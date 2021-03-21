@@ -19,7 +19,6 @@ libraryDependencies ++= Seq(
   "com.github.pathikrit" %% "better-files"    % "3.9.1",
   "org.slf4j"             % "slf4j-api"       % "1.7.30",
   "org.slf4j"             % "slf4j-simple"    % "1.7.30"         % Test,
-  "org.ejml"              % "ejml-core"       % ejmlVersion,
-  "org.ejml"              % "ejml-ddense"     % ejmlVersion,
-  "org.typelevel"        %% "spire"           % "0.17.0"
+  "org.apache.commons"    % "commons-math3"   % "3.6.1",
+  "io.github.metarank"   %% "cfor"            % "0.2"
 )
