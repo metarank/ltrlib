@@ -1,6 +1,6 @@
 # libLTR: a Learn-to-Rank algorithm library
 
-[![CI Status](https://github.com/metarank/libltr/workflows/CI/badge.svg)](https://github.com/metarank/libltr/actions)
+[![CI Status](https://github.com/metarank/ltrlib/workflows/CI/badge.svg)](https://github.com/metarank/ltrlib/actions)
 [![License: Apache 2](https://img.shields.io/badge/License-Apache2-green.svg)](https://opensource.org/licenses/Apache-2.0)
 
 A Java/Scala library to wrap and implement basic learn-to-rank ML algorithms under the same
