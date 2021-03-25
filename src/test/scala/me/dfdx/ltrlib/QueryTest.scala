@@ -33,7 +33,7 @@ class QueryTest extends AnyFlatSpec with Matchers {
         )
       )
     )
-    result shouldBe a[Failure[IllegalArgumentException]]
+    result shouldBe a[Failure[_]]
   }
 
 }

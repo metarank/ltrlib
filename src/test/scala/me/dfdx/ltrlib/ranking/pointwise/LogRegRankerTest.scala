@@ -9,7 +9,7 @@ import org.scalatest.matchers.should.Matchers
 
 class LogRegRankerTest extends AnyFlatSpec with Matchers {
   it should "train simple model" in {
-    val model = LogRegRanker(LetorDataset()).fit(BatchSGD(1000, 2000))
+    val model = LogRegRanker(LetorDataset.train).fit(BatchSGD(30, 2000))
     model.weights.nonEmpty shouldBe true
   }
 
