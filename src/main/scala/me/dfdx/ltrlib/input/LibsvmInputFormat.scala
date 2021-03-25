@@ -61,7 +61,7 @@ case class LibsvmInputFormat(data: InputStream) extends InputFormat {
 object LibsvmInputFormat {
   val queryPattern = "(qid:)?([0-9]+)".r
   def parseLine(dim: Int, line: String, index: Int = 0): LabeledItem = {
-    val tokens = line.split(' ')
+    val tokens = line.split(' ').takeWhile(!_.contains('#'))
     if (tokens.length < 3)
       throw new IllegalArgumentException(
         s"LibSVM format requires at least two columns: label and qid, but got ${tokens.length} on row $index"

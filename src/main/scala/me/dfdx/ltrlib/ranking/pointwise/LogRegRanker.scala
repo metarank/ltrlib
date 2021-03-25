@@ -3,20 +3,23 @@ package me.dfdx.ltrlib.ranking.pointwise
 import me.dfdx.ltrlib.model.{Dataset, Feature}
 import me.dfdx.ltrlib.model.Feature.{SingularFeature, VectorFeature}
 import me.dfdx.ltrlib.ranking.Ranker
-import me.dfdx.ltrlib.ranking.pointwise.LogRegRanker.{LogRegModel, NoOptions, RegWeights}
+import me.dfdx.ltrlib.ranking.pointwise.LogRegRanker.{
+  LogRegModel,
+  NoOptions,
+  RegWeights,
+  RegressionOptions,
+  SingularFeatureWeight,
+  VectorFeatureWeight
+}
 import org.apache.commons.math3.linear.{Array2DRowRealMatrix, ArrayRealVector, RealVector}
 import io.github.metarank.cfor._
 
 import scala.util.Random
 
-case class LogRegRanker(train: Dataset) extends Ranker[LogRegModel, NoOptions] {
+case class LogRegRanker(train: Dataset) extends Ranker[LogRegModel, RegressionOptions] {
   val LR = 0.3
   val IT = 200
-  override def fit(options: NoOptions): LogRegModel = {
-    // random weights
-    var weights: RealVector = new ArrayRealVector(train.desc.dim)
-    var intercept           = 0.0
-
+  override def fit(options: RegressionOptions): LogRegModel = {
     // fill the data
     val x   = new Array2DRowRealMatrix(train.itemCount, train.desc.dim)
     val y   = new ArrayRealVector(train.itemCount)
@@ -32,16 +35,26 @@ case class LogRegRanker(train: Dataset) extends Ranker[LogRegModel, NoOptions] {
         }
       }
     }
-    //val sgd  = trainSGD(x, y)
-    val sgdb = trainBatchSGD(x, y, 100)
-    val br   = 1
-    ???
+    val weights = options match {
+      case LogRegRanker.SGD(iterations)                 => trainSGD(x, y, iterations)
+      case LogRegRanker.BatchSGD(iterations, batchSize) => trainBatchSGD(x, y, iterations, batchSize)
+    }
+
+    val featureWeights = for {
+      (feature, offset) <- train.desc.offsets.toList.sortBy(_._2)
+    } yield {
+      feature match {
+        case f @ SingularFeature(_)     => SingularFeatureWeight(f, weights.weights.getEntry(offset))
+        case f @ VectorFeature(_, size) => VectorFeatureWeight(f, weights.weights.getSubVector(offset, size).toArray)
+      }
+    }
+    LogRegModel(featureWeights, weights.intercept)
   }
 
-  def trainSGD(x: Array2DRowRealMatrix, y: RealVector) = {
+  def trainSGD(x: Array2DRowRealMatrix, y: RealVector, iterations: Int) = {
     val weights: RealVector = new ArrayRealVector(train.desc.dim)
     var intercept           = 0.0
-    cfor(0 until IT) { it =>
+    cfor(0 until iterations) { it =>
       {
         var sumError = 0.0
         cfor(0 until x.getRowDimension) { row =>
@@ -63,10 +76,10 @@ case class LogRegRanker(train: Dataset) extends Ranker[LogRegModel, NoOptions] {
     RegWeights(intercept, weights)
   }
 
-  def trainBatchSGD(x: Array2DRowRealMatrix, y: RealVector, batchSize: Int) = {
+  def trainBatchSGD(x: Array2DRowRealMatrix, y: RealVector, iterations: Int, batchSize: Int) = {
     var weights: RealVector = new ArrayRealVector(train.desc.dim)
     var intercept           = 0.0
-    cfor(0 until IT) { it =>
+    cfor(0 until iterations) { it =>
       {
         var sumError = 0.0
         val sample   = randomSample(0, x.getRowDimension, batchSize)
@@ -123,8 +136,11 @@ object LogRegRanker {
   sealed trait FeatureWeight
   case class SingularFeatureWeight(feature: SingularFeature, weight: Double)     extends FeatureWeight
   case class VectorFeatureWeight(feature: VectorFeature, weights: Array[Double]) extends FeatureWeight
-  case class LogRegModel(weights: List[FeatureWeight], residual: Double)
+  case class LogRegModel(weights: List[FeatureWeight], intercept: Double)
 
+  sealed trait RegressionOptions
+  case class SGD(iterations: Int)                      extends RegressionOptions
+  case class BatchSGD(iterations: Int, batchSize: Int) extends RegressionOptions
   case class NoOptions()
 
   case class RegWeights(intercept: Double, weights: RealVector)
