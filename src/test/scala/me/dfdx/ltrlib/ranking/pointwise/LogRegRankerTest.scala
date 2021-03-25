@@ -1,6 +1,7 @@
 package me.dfdx.ltrlib.ranking.pointwise
 
 import me.dfdx.ltrlib.dataset.{LetorDataset, LinearDataset, SmallDiabetesDataset}
+import me.dfdx.ltrlib.metric.{MSE, RMSE}
 import me.dfdx.ltrlib.model.Feature.SingularFeature
 import me.dfdx.ltrlib.model.{Dataset, DatasetDescriptor, LabeledItem, Query}
 import me.dfdx.ltrlib.ranking.pointwise.LogRegRanker.{BatchSGD, NoOptions, SGD}
@@ -11,6 +12,13 @@ class LogRegRankerTest extends AnyFlatSpec with Matchers {
   it should "train simple model" in {
     val model = LogRegRanker(LetorDataset.train).fit(BatchSGD(30, 2000))
     model.weights.nonEmpty shouldBe true
+  }
+
+  it should "eval mse" in {
+    val logreg = LogRegRanker(LetorDataset.train)
+    val model  = logreg.fit(BatchSGD(30, 2000))
+    val mse    = logreg.eval(model, MSE)
+    mse should be > 1.0
   }
 
   it should "not fail on correlated features" in {

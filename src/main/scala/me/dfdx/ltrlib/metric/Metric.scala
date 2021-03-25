@@ -1,6 +1,5 @@
 package me.dfdx.ltrlib.metric
 
 trait Metric {
-  def eval(y: Double, yhat: Double): Double
-  def gradient(y: Double, yhat: Double): Double
+  def eval(y: Array[Double], yhat: Array[Double]): Double
 }

@@ -13,14 +13,16 @@ import me.dfdx.ltrlib.ranking.pointwise.LogRegRanker.{
 }
 import org.apache.commons.math3.linear.{Array2DRowRealMatrix, ArrayRealVector, RealVector}
 import io.github.metarank.cfor._
+import me.dfdx.ltrlib.metric.Metric
 
 import scala.util.Random
 
 case class LogRegRanker(train: Dataset) extends Ranker[LogRegModel, RegressionOptions] {
-  val LR = 0.3
-  val IT = 200
-  override def fit(options: RegressionOptions): LogRegModel = {
-    // fill the data
+  val LR     = 0.3
+  val IT     = 200
+  val (x, y) = prepare()
+
+  def prepare() = {
     val x   = new Array2DRowRealMatrix(train.itemCount, train.desc.dim)
     val y   = new ArrayRealVector(train.itemCount)
     var row = 0
@@ -35,6 +37,10 @@ case class LogRegRanker(train: Dataset) extends Ranker[LogRegModel, RegressionOp
         }
       }
     }
+    (x, y)
+  }
+  override def fit(options: RegressionOptions): LogRegModel = {
+    // fill the data
     val weights = options match {
       case LogRegRanker.SGD(iterations)                 => trainSGD(x, y, iterations)
       case LogRegRanker.BatchSGD(iterations, batchSize) => trainBatchSGD(x, y, iterations, batchSize)
@@ -49,6 +55,18 @@ case class LogRegRanker(train: Dataset) extends Ranker[LogRegModel, RegressionOp
       }
     }
     LogRegModel(featureWeights, weights.intercept)
+  }
+
+  override def eval(model: LogRegModel, metric: Metric): Double = {
+    val weights = new ArrayRealVector(model.weights.flatMap {
+      case SingularFeatureWeight(_, weight) => List(weight)
+      case VectorFeatureWeight(_, weights)  => weights.toList
+    }.toArray)
+    val yhat = new Array[Double](train.itemCount)
+    cfor(0 until train.itemCount) { i =>
+      yhat(i) = model.intercept + x.getRowVector(i).dotProduct(weights)
+    }
+    metric.eval(y.toArray, yhat)
   }
 
   def trainSGD(x: Array2DRowRealMatrix, y: RealVector, iterations: Int) = {
