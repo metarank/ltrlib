@@ -1,8 +1,14 @@
 package me.dfdx.ltrlib.model
 
-case class Query(group: Int, labels: Array[Double], values: Array[Double], columns: Int) {
+import io.github.metarank.cfor._
+case class Query(group: Int, labels: Array[Double], values: Array[Double], columns: Int, rows: Int) {
   val memUsed                      = labels.length * 8 + values.length * 8
   def getValue(row: Int, col: Int) = values(columns * row + col)
+  def getRow(row: Int): Array[Double] = {
+    val result = new Array[Double](columns)
+    cfor(0 until columns) { col => result(col) = values(row * columns + col) }
+    result
+  }
 }
 
 object Query {
@@ -24,6 +30,6 @@ object Query {
       labels(i) = item.label
       System.arraycopy(item.values, 0, data, desc.dim * i, item.values.length)
     }
-    new Query(group, labels, data, desc.dim)
+    new Query(group, labels, data, desc.dim, values.size)
   }
 }
