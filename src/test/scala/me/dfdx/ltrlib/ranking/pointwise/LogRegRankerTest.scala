@@ -17,7 +17,7 @@ class LogRegRankerTest extends AnyFlatSpec with Matchers {
   it should "eval mse" in {
     val logreg = LogRegRanker(LetorDataset.train)
     val model  = logreg.fit(BatchSGD(30, 2000))
-    val mse    = logreg.eval(model, MSE)
+    val mse    = logreg.eval(model, LetorDataset.train, MSE)
     mse should be > 1.0
   }
 

@@ -1,0 +1,31 @@
+package me.dfdx.ltrlib.metric
+
+import io.github.metarank.cfor._
+
+case class NDCG(position: Int) extends Metric {
+  override def eval(y: Array[Array[Double]], yhat: Array[Array[Double]]): Double = {
+    var ndcg = 0.0
+    cfor(y.indices) { group =>
+      {
+        var dcg = 0.0
+        if (y(group).exists(_ != 0.0)) {
+          val zipped             = y(group).zip(yhat(group))
+          val sortedByPrediction = zipped.sortBy(-_._2).map(_._1)
+          cfor(0 until math.min(y(group).length, position)) { doc =>
+            dcg += (math.pow(2.0, sortedByPrediction(doc)) - 1.0) / (math.log10(doc + 2) / math.log10(2))
+          }
+          var idcg         = 0.0
+          val sortedByReal = zipped.sortBy(-_._1).map(_._1)
+          cfor(0 until math.min(y(group).length, position)) { doc =>
+            idcg += (math.pow(2.0, sortedByReal(doc)) - 1.0) / (math.log10(doc + 2) / math.log10(2))
+          }
+          if (java.lang.Double.isNaN(dcg) || java.lang.Double.isNaN(idcg) || (idcg == 0.0)) {
+            val br = 1
+          }
+          ndcg += dcg / idcg
+        }
+      }
+    }
+    ndcg / y.length
+  }
+}

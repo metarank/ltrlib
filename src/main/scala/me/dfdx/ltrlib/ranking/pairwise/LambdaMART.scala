@@ -46,7 +46,7 @@ case class LambdaMART(dataset: Dataset) extends Ranker[LGBMBooster, BoosterOptio
     ds
   }
   override def fit(options: BoosterOptions): LGBMBooster = {
-    val booster = LGBMBooster.create(ds, "objective=lambdarank")
+    val booster = LGBMBooster.create(ds, "objective=lambdarank metric=ndcg")
     cfor(0 until 100) { i =>
       {
         booster.updateOneIter()
@@ -57,19 +57,14 @@ case class LambdaMART(dataset: Dataset) extends Ranker[LGBMBooster, BoosterOptio
     booster
   }
 
-  override def eval(model: LGBMBooster, metric: Metric): Double = {
-    val y    = new Array[Double](dataset.itemCount)
-    val yhat = new Array[Double](dataset.itemCount)
-    var pos  = 0
-    for {
-      group <- dataset.groups
-      row   <- 0 until group.rows
-    } {
-      y(pos) = group.labels(row)
-      yhat(pos) = model.predictForMatSingleRow(group.getRow(row))
-      pos += 1
+  override def eval(model: LGBMBooster, data: Dataset, metric: Metric): Double = {
+    val yhat = for {
+      group <- data.groups
+    } yield {
+      model.predictForMat(group.values, group.rows, group.columns, true)
     }
-    metric.eval(y, yhat)
+    val y = data.groups.map(_.labels)
+    metric.eval(y.toArray, yhat.toArray)
   }
 }
 

@@ -6,5 +6,5 @@ import me.dfdx.ltrlib.util.Logging
 
 trait Ranker[M, O] extends Logging {
   def fit(options: O): M
-  def eval(model: M, metric: Metric): Double
+  def eval(model: M, data: Dataset, metric: Metric): Double
 }

@@ -10,7 +10,7 @@ class LambdaMARTTest extends AnyFlatSpec with Matchers {
   it should "train on letor" in {
     val lm      = LambdaMART(LetorDataset.train)
     val booster = lm.fit(LightGBMBoosterOptions(10))
-    val mse     = lm.eval(booster, MSE)
+    val mse     = lm.eval(booster, LetorDataset.train, MSE)
     val br      = 1
   }
 }

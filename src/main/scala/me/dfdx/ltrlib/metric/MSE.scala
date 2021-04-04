@@ -3,13 +3,18 @@ package me.dfdx.ltrlib.metric
 import io.github.metarank.cfor._
 
 object MSE extends Metric {
-  def eval(y: Array[Double], yhat: Array[Double]): Double = {
+  def eval(y: Array[Array[Double]], yhat: Array[Array[Double]]): Double = {
     var sum = 0.0
+    var cnt = 0
     cfor(y.indices) { i =>
-      {
-        sum += (y(i) - yhat(i)) * (y(i) - yhat(i))
+      cfor(y(i).indices) { j =>
+        {
+          sum += (y(i)(j) - yhat(i)(j)) * (y(i)(j) - yhat(i)(j))
+          cnt += 1
+        }
       }
+
     }
-    sum / y.length
+    sum / cnt
   }
 }

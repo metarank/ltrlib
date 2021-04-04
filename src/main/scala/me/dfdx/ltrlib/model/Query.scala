@@ -1,6 +1,7 @@
 package me.dfdx.ltrlib.model
 
 import io.github.metarank.cfor._
+import org.apache.commons.math3.linear.{ArrayRealVector, RealVector}
 case class Query(group: Int, labels: Array[Double], values: Array[Double], columns: Int, rows: Int) {
   val memUsed                      = labels.length * 8 + values.length * 8
   def getValue(row: Int, col: Int) = values(columns * row + col)
@@ -9,6 +10,7 @@ case class Query(group: Int, labels: Array[Double], values: Array[Double], colum
     cfor(0 until columns) { col => result(col) = values(row * columns + col) }
     result
   }
+  def getRowVector(row: Int): ArrayRealVector = new ArrayRealVector(getRow(row))
 }
 
 object Query {

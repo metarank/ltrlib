@@ -57,16 +57,22 @@ case class LogRegRanker(train: Dataset) extends Ranker[LogRegModel, RegressionOp
     LogRegModel(featureWeights, weights.intercept)
   }
 
-  override def eval(model: LogRegModel, metric: Metric): Double = {
+  override def eval(model: LogRegModel, data: Dataset, metric: Metric): Double = {
     val weights = new ArrayRealVector(model.weights.flatMap {
       case SingularFeatureWeight(_, weight) => List(weight)
       case VectorFeatureWeight(_, weights)  => weights.toList
     }.toArray)
-    val yhat = new Array[Double](train.itemCount)
-    cfor(0 until train.itemCount) { i =>
-      yhat(i) = model.intercept + x.getRowVector(i).dotProduct(weights)
+    val y = data.groups.map(_.labels)
+    val yhat = for {
+      group <- data.groups
+    } yield {
+      val pred = new Array[Double](group.rows)
+      cfor(0 until group.rows) { row =>
+        pred(row) = model.intercept + group.getRowVector(row).dotProduct(weights)
+      }
+      pred
     }
-    metric.eval(y.toArray, yhat)
+    metric.eval(y.toArray, yhat.toArray)
   }
 
   def trainSGD(x: Array2DRowRealMatrix, y: RealVector, iterations: Int) = {
