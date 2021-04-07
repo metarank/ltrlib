@@ -15,12 +15,9 @@ case class NDCG(position: Int) extends Metric {
             dcg += (math.pow(2.0, sortedByPrediction(doc)) - 1.0) / (math.log10(doc + 2) / math.log10(2))
           }
           var idcg         = 0.0
-          val sortedByReal = zipped.sortBy(-_._1).map(_._1)
+          val sortedByReal = y(group).sorted.reverse
           cfor(0 until math.min(y(group).length, position)) { doc =>
             idcg += (math.pow(2.0, sortedByReal(doc)) - 1.0) / (math.log10(doc + 2) / math.log10(2))
-          }
-          if (java.lang.Double.isNaN(dcg) || java.lang.Double.isNaN(idcg) || (idcg == 0.0)) {
-            val br = 1
           }
           ndcg += dcg / idcg
         }
