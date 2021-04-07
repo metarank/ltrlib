@@ -1,14 +1,17 @@
 package me.dfdx.ltrlib.ranking.pairwise
 
 import io.github.metarank.cfor.cfor
-import io.github.metarank.lightgbm4j.{LGBMBooster, LGBMDataset}
-import me.dfdx.ltrlib.booster.Booster
-import me.dfdx.ltrlib.booster.Booster.BoosterDataset
+import me.dfdx.ltrlib.booster.Booster.BoosterOptions
+import me.dfdx.ltrlib.booster.{Booster, BoosterDataset}
 import me.dfdx.ltrlib.metric.Metric
 import me.dfdx.ltrlib.model.Dataset
 import me.dfdx.ltrlib.ranking.Ranker
 
-case class LambdaMART(dataset: Dataset, boosterBuilder: BoosterDataset => Booster) extends Ranker[Booster] {
+case class LambdaMART(
+    dataset: Dataset,
+    options: BoosterOptions,
+    boosterBuilder: (BoosterDataset, BoosterOptions) => Booster
+) extends Ranker[Booster] {
 
   override def fit(): Booster = {
     val x     = new Array[Double](dataset.itemCount * dataset.desc.dim)
@@ -38,9 +41,9 @@ case class LambdaMART(dataset: Dataset, boosterBuilder: BoosterDataset => Booste
       .map(_._2)
       .toArray
 
-    val train = BoosterDataset(x, label, qid2, dataset.itemCount, dataset.desc.dim)
+    val train = BoosterDataset(dataset, x, label, qid2, dataset.itemCount, dataset.desc.dim)
 
-    val boosterModel = boosterBuilder(train)
+    val boosterModel = boosterBuilder(train, options)
     cfor(0 until 100) { i =>
       {
         boosterModel.trainOneIteration()

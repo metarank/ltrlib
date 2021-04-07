@@ -7,6 +7,5 @@ trait Booster {
 }
 
 object Booster {
-  case class BoosterDataset(data: Array[Double], labels: Array[Double], groups: Array[Int], rows: Int, cols: Int)
-  case class BoosterOptions(trees: Int)
+  case class BoosterOptions(trees: Int = 100, learningRate: Double = 0.1)
 }

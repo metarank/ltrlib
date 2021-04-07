@@ -1,6 +1,7 @@
 package me.dfdx.ltrlib
 
 import better.files.File
+import me.dfdx.ltrlib.booster.Booster.BoosterOptions
 import me.dfdx.ltrlib.booster.{LightGBMBooster, XGBoostBooster}
 import me.dfdx.ltrlib.input.LibsvmInputFormat
 import me.dfdx.ltrlib.metric.{Metric, NDCG}
@@ -17,11 +18,11 @@ object Main {
     val desc  = DatasetDescriptor((0 until 700).map(i => SingularFeature(s"f$i")).toList)
     val train = Dataset(desc, LibsvmInputFormat(File(s"$prefix/set2.train.txt").newInputStream).load(desc))
     val test  = Dataset(desc, LibsvmInputFormat(File(s"$prefix/set2.test.txt").newInputStream).load(desc))
-
-    val xgb  = trainModel(LambdaMART(train, XGBoostBooster.apply), NDCG(30), test)
-    val lgbm = trainModel(LambdaMART(train, LightGBMBooster.apply), NDCG(30), test)
-    val lr   = trainModel(LogRegRanker(train, BatchSGD(100, 1000)), NDCG(30), test)
-    val rand = trainModel(RandomRanker(), NDCG(30), test)
+    val opts  = BoosterOptions()
+    val xgb   = trainModel(LambdaMART(train, opts, XGBoostBooster.apply), NDCG(30), test)
+    val lgbm  = trainModel(LambdaMART(train, opts, LightGBMBooster.apply), NDCG(30), test)
+    val lr    = trainModel(LogRegRanker(train, BatchSGD(100, 1000)), NDCG(30), test)
+    val rand  = trainModel(RandomRanker(), NDCG(30), test)
     println(s"lgbm=$lgbm xgb=$xgb logreg=$lr rand=$rand")
   }
 

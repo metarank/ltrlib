@@ -1,6 +1,6 @@
 package me.dfdx.ltrlib.booster
 
-import me.dfdx.ltrlib.booster.Booster.{BoosterDataset, BoosterOptions}
+import me.dfdx.ltrlib.booster.Booster.BoosterOptions
 import ml.dmlc.xgboost4j.java.{DMatrix, IObjective, XGBoost}
 
 import scala.jdk.CollectionConverters._
@@ -28,14 +28,14 @@ case class XGBoostBooster(model: ml.dmlc.xgboost4j.java.Booster, train: DMatrix)
 }
 
 object XGBoostBooster {
-  def apply(d: BoosterDataset) = {
+  def apply(d: BoosterDataset, options: BoosterOptions) = {
     val mat = new DMatrix(d.data.map(_.toFloat), d.rows, d.cols)
     mat.setLabel(d.labels.map(_.toFloat))
     mat.setGroup(d.groups)
     val opts = Map(
       "objective"   -> "rank:pairwise",
       "eval_metric" -> "ndcg",
-      "num_round"   -> 200
+      "num_round"   -> options.trees
     ).asJava
     new XGBoostBooster(
       model = XGBoost.train(mat, opts, 0, Map.empty.asJava, null, null),
