@@ -2,19 +2,17 @@ package me.dfdx.ltrlib.ranking.pairwise
 
 import io.github.metarank.cfor.cfor
 import io.github.metarank.lightgbm4j.{LGBMBooster, LGBMDataset}
+import me.dfdx.ltrlib.booster.Booster
+import me.dfdx.ltrlib.booster.Booster.BoosterDataset
 import me.dfdx.ltrlib.metric.Metric
 import me.dfdx.ltrlib.model.Dataset
 import me.dfdx.ltrlib.ranking.Ranker
-import me.dfdx.ltrlib.ranking.pairwise.LambdaMART.BoosterOptions
-import org.apache.commons.math3.linear.{Array2DRowRealMatrix, ArrayRealVector}
 
-case class LambdaMART(dataset: Dataset) extends Ranker[LGBMBooster, BoosterOptions] {
+case class LambdaMART(dataset: Dataset, boosterBuilder: BoosterDataset => Booster) extends Ranker[Booster] {
 
-  lazy val ds = prepare
-
-  def prepare = {
+  override def fit(): Booster = {
     val x     = new Array[Double](dataset.itemCount * dataset.desc.dim)
-    val label = new Array[Float](dataset.itemCount)
+    val label = new Array[Double](dataset.itemCount)
     val qid   = new Array[Int](dataset.itemCount)
     var row   = 0
     for {
@@ -22,7 +20,7 @@ case class LambdaMART(dataset: Dataset) extends Ranker[LGBMBooster, BoosterOptio
     } {
       cfor(group.labels.indices) { item =>
         {
-          label(row) = group.labels(item).toFloat
+          label(row) = group.labels(item)
           qid(row) = group.group
           cfor(0 until group.columns) { col => x(row * dataset.desc.dim + col) = group.getValue(item, col) }
           row += 1
@@ -40,35 +38,26 @@ case class LambdaMART(dataset: Dataset) extends Ranker[LGBMBooster, BoosterOptio
       .map(_._2)
       .toArray
 
-    val ds = LGBMDataset.createFromMat(x, dataset.itemCount, dataset.desc.dim, true, "")
-    ds.setField("label", label)
-    ds.setField("group", qid2)
-    ds
-  }
-  override def fit(options: BoosterOptions): LGBMBooster = {
-    val booster = LGBMBooster.create(ds, "objective=lambdarank metric=ndcg")
+    val train = BoosterDataset(x, label, qid2, dataset.itemCount, dataset.desc.dim)
+
+    val boosterModel = boosterBuilder(train)
     cfor(0 until 100) { i =>
       {
-        booster.updateOneIter()
-        val err = booster.getEval(0)
-        logger.info(s"[$i] err = ${err(0)}")
+        boosterModel.trainOneIteration()
+        val err = boosterModel.evalMetric()
+        logger.info(s"[$i] err = $err")
       }
     }
-    booster
+    boosterModel
   }
 
-  override def eval(model: LGBMBooster, data: Dataset, metric: Metric): Double = {
+  override def eval(model: Booster, data: Dataset, metric: Metric): Double = {
     val yhat = for {
       group <- data.groups
     } yield {
-      model.predictForMat(group.values, group.rows, group.columns, true)
+      model.predictMat(group.values, group.rows, group.columns)
     }
     val y = data.groups.map(_.labels)
     metric.eval(y.toArray, yhat.toArray)
   }
-}
-
-object LambdaMART {
-  sealed trait BoosterOptions
-  case class LightGBMBoosterOptions(trees: Int) extends BoosterOptions
 }

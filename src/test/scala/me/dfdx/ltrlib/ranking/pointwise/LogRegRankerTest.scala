@@ -10,13 +10,13 @@ import org.scalatest.matchers.should.Matchers
 
 class LogRegRankerTest extends AnyFlatSpec with Matchers {
   it should "train simple model" in {
-    val model = LogRegRanker(LetorDataset.train).fit(BatchSGD(30, 2000))
+    val model = LogRegRanker(LetorDataset.train, BatchSGD(30, 2000)).fit()
     model.weights.nonEmpty shouldBe true
   }
 
   it should "eval mse" in {
-    val logreg = LogRegRanker(LetorDataset.train)
-    val model  = logreg.fit(BatchSGD(30, 2000))
+    val logreg = LogRegRanker(LetorDataset.train, BatchSGD(30, 2000))
+    val model  = logreg.fit()
     val mse    = logreg.eval(model, LetorDataset.train, MSE)
     mse should be > 1.0
   }
@@ -36,7 +36,7 @@ class LogRegRankerTest extends AnyFlatSpec with Matchers {
         )
       )
     )
-    val model = LogRegRanker(dataset).fit(SGD(10))
+    val model = LogRegRanker(dataset, SGD(10)).fit()
     model.weights.nonEmpty shouldBe true
   }
 }

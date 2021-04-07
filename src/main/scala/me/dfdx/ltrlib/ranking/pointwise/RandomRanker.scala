@@ -7,8 +7,8 @@ import me.dfdx.ltrlib.ranking.Ranker
 
 import scala.util.Random
 
-case class RandomRanker() extends Ranker[Unit, Unit] {
-  override def fit(options: Unit): Unit = {}
+case class RandomRanker() extends Ranker[Unit] {
+  override def fit(): Unit = {}
 
   override def eval(model: Unit, data: Dataset, metric: Metric): Double = {
     val y = data.groups.map(_.labels)

@@ -17,7 +17,7 @@ import me.dfdx.ltrlib.metric.Metric
 
 import scala.util.Random
 
-case class LogRegRanker(train: Dataset) extends Ranker[LogRegModel, RegressionOptions] {
+case class LogRegRanker(train: Dataset, options: RegressionOptions) extends Ranker[LogRegModel] {
   val LR     = 0.3
   val IT     = 200
   val (x, y) = prepare()
@@ -39,7 +39,7 @@ case class LogRegRanker(train: Dataset) extends Ranker[LogRegModel, RegressionOp
     }
     (x, y)
   }
-  override def fit(options: RegressionOptions): LogRegModel = {
+  override def fit(): LogRegModel = {
     // fill the data
     val weights = options match {
       case LogRegRanker.SGD(iterations)                 => trainSGD(x, y, iterations)

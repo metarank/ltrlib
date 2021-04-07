@@ -1,13 +1,13 @@
 package me.dfdx.ltrlib
 
 import better.files.File
+import me.dfdx.ltrlib.booster.{LightGBMBooster, XGBoostBooster}
 import me.dfdx.ltrlib.input.LibsvmInputFormat
 import me.dfdx.ltrlib.metric.{Metric, NDCG}
 import me.dfdx.ltrlib.model.Feature.SingularFeature
 import me.dfdx.ltrlib.model.{Dataset, DatasetDescriptor}
 import me.dfdx.ltrlib.ranking.Ranker
 import me.dfdx.ltrlib.ranking.pairwise.LambdaMART
-import me.dfdx.ltrlib.ranking.pairwise.LambdaMART.LightGBMBoosterOptions
 import me.dfdx.ltrlib.ranking.pointwise.{LogRegRanker, RandomRanker}
 import me.dfdx.ltrlib.ranking.pointwise.LogRegRanker.{BatchSGD, NoOptions}
 
@@ -18,14 +18,15 @@ object Main {
     val train = Dataset(desc, LibsvmInputFormat(File(s"$prefix/set2.train.txt").newInputStream).load(desc))
     val test  = Dataset(desc, LibsvmInputFormat(File(s"$prefix/set2.test.txt").newInputStream).load(desc))
 
-    val lmart = trainModel(LambdaMART(train), LightGBMBoosterOptions(100), NDCG(30), test)
-    val lr    = trainModel(LogRegRanker(train), BatchSGD(100, 1000), NDCG(30), test)
-    val rand  = trainModel[Unit, Unit](RandomRanker(), (), NDCG(30), test)
-    println(s"mart=$lmart logreg=$lr rand=$rand")
+    val xgb  = trainModel(LambdaMART(train, XGBoostBooster.apply), NDCG(30), test)
+    val lgbm = trainModel(LambdaMART(train, LightGBMBooster.apply), NDCG(30), test)
+    val lr   = trainModel(LogRegRanker(train, BatchSGD(100, 1000)), NDCG(30), test)
+    val rand = trainModel(RandomRanker(), NDCG(30), test)
+    println(s"lgbm=$lgbm xgb=$xgb logreg=$lr rand=$rand")
   }
 
-  def trainModel[M, O](ranker: Ranker[M, O], options: O, metric: Metric, test: Dataset) = {
-    val model = ranker.fit(options)
+  def trainModel[M](ranker: Ranker[M], metric: Metric, test: Dataset) = {
+    val model = ranker.fit()
     ranker.eval(model, test, metric)
   }
 }
