@@ -5,7 +5,7 @@ import LogRegRanker.{LogRegModel, NoOptions, RegWeights, RegressionOptions, Sing
 import org.apache.commons.math3.linear.{Array2DRowRealMatrix, ArrayRealVector, RealVector}
 import io.github.metarank.cfor._
 import io.github.metarank.ltrlib.metric.Metric
-import io.github.metarank.ltrlib.model.Dataset
+import io.github.metarank.ltrlib.model.{Dataset, Model}
 import io.github.metarank.ltrlib.ranking.Ranker
 
 import scala.util.Random
@@ -48,24 +48,6 @@ case class LogRegRanker(train: Dataset, options: RegressionOptions) extends Rank
       }
     }
     LogRegModel(featureWeights, weights.intercept)
-  }
-
-  override def eval(model: LogRegModel, data: Dataset, metric: Metric): Double = {
-    val weights = new ArrayRealVector(model.weights.flatMap {
-      case SingularFeatureWeight(_, weight) => List(weight)
-      case VectorFeatureWeight(_, weights)  => weights.toList
-    }.toArray)
-    val y = data.groups.map(_.labels)
-    val yhat = for {
-      group <- data.groups
-    } yield {
-      val pred = new Array[Double](group.rows)
-      cfor(0 until group.rows) { row =>
-        pred(row) = model.intercept + group.getRowVector(row).dotProduct(weights)
-      }
-      pred
-    }
-    metric.eval(y.toArray, yhat.toArray)
   }
 
   def trainSGD(x: Array2DRowRealMatrix, y: RealVector, iterations: Int) = {
@@ -153,7 +135,26 @@ object LogRegRanker {
   sealed trait FeatureWeight
   case class SingularFeatureWeight(feature: SingularFeature, weight: Double)     extends FeatureWeight
   case class VectorFeatureWeight(feature: VectorFeature, weights: Array[Double]) extends FeatureWeight
-  case class LogRegModel(weights: List[FeatureWeight], intercept: Double)
+  case class LogRegModel(weights: List[FeatureWeight], intercept: Double) extends Model {
+    override def eval(data: Dataset, metric: Metric): Double = {
+      val w = new ArrayRealVector(weights.flatMap {
+        case SingularFeatureWeight(_, weight) => List(weight)
+        case VectorFeatureWeight(_, weights)  => weights.toList
+      }.toArray)
+      val y = data.groups.map(_.labels)
+      val yhat = for {
+        group <- data.groups
+      } yield {
+        val pred = new Array[Double](group.rows)
+        cfor(0 until group.rows) { row =>
+          pred(row) = intercept + group.getRowVector(row).dotProduct(w)
+        }
+        pred
+      }
+      metric.eval(y.toArray, yhat.toArray)
+    }
+
+  }
 
   sealed trait RegressionOptions
   case class SGD(iterations: Int)                      extends RegressionOptions

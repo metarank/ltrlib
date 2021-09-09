@@ -1,17 +1,18 @@
 package io.github.metarank.ltrlib.booster
 
-import io.github.metarank.ltrlib.booster.Booster.BoosterOptions
-import Booster.BoosterOptions
+import Booster.{BoosterFactory, BoosterOptions}
 import ml.dmlc.xgboost4j.java.{DMatrix, IObjective, XGBoost}
 
+import java.io.{ByteArrayInputStream, ByteArrayOutputStream}
+import java.util.Base64
 import scala.jdk.CollectionConverters._
 
-case class XGBoostBooster(model: ml.dmlc.xgboost4j.java.Booster, train: DMatrix) extends Booster {
+case class XGBoostBooster(model: ml.dmlc.xgboost4j.java.Booster) extends Booster[DMatrix] {
 
-  override def trainOneIteration(): Unit = model.update(train, 1)
+  override def trainOneIteration(dataset: DMatrix): Unit = model.update(dataset, 1)
 
-  override def evalMetric(): Double = {
-    val result = model.evalSet(Array(train), Array("train"), 1)
+  override def evalMetric(dataset: DMatrix): Double = {
+    val result = model.evalSet(Array(dataset), Array("train"), 1)
     result.split(':').last.toDouble
   }
 
@@ -26,21 +27,35 @@ case class XGBoostBooster(model: ml.dmlc.xgboost4j.java.Booster, train: DMatrix)
     }
     out
   }
+
+  override def save(): String = {
+    val bytes = new ByteArrayOutputStream()
+    model.saveModel(bytes)
+    val base64 = Base64.getEncoder.encodeToString(bytes.toByteArray)
+    base64
+  }
 }
 
-object XGBoostBooster {
-  def apply(d: BoosterDataset, options: BoosterOptions) = {
+object XGBoostBooster extends BoosterFactory[DMatrix, XGBoostBooster] {
+  override def apply(string: String): XGBoostBooster = {
+    val decoded = Base64.getDecoder.decode(string)
+    val booster = XGBoost.loadModel(new ByteArrayInputStream(decoded))
+    XGBoostBooster(booster)
+  }
+  override def formatData(d: BoosterDataset): DMatrix = {
     val mat = new DMatrix(d.data.map(_.toFloat), d.rows, d.cols)
     mat.setLabel(d.labels.map(_.toFloat))
     mat.setGroup(d.groups)
+    mat
+  }
+  def apply(d: DMatrix, options: BoosterOptions) = {
     val opts = Map[String, Object](
       "objective"   -> "rank:pairwise",
       "eval_metric" -> "ndcg",
       "num_round"   -> Integer.valueOf(options.trees)
     ).asJava
     new XGBoostBooster(
-      model = XGBoost.train(mat, opts, 0, Map.empty.asJava, null, null),
-      train = mat
+      model = XGBoost.train(d, opts, 0, Map.empty.asJava, null, null)
     )
   }
 }

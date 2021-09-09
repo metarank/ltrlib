@@ -31,7 +31,7 @@ val spec    = DatasetDescriptor((1 to 46).map(i => SingularFeature(s"f$i")).toLi
 val dataset = Dataset(spec, loader.load(spec))
 
 // configured booster 
-val lm      = LambdaMART(dataset, BoosterOptions(), LightGBMBooster(_, _))
+val lm      = LambdaMART(dataset, BoosterOptions(), LightGBMBooster)
 // trained model
 val model   = lm.fit()
 // NDCG error with cutoff on 10th position

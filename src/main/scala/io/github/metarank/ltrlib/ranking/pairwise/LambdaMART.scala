@@ -2,18 +2,18 @@ package io.github.metarank.ltrlib.ranking.pairwise
 
 import io.github.metarank.cfor.cfor
 import io.github.metarank.ltrlib.ranking.Ranker
-import io.github.metarank.ltrlib.booster.Booster.BoosterOptions
+import io.github.metarank.ltrlib.booster.Booster.{BoosterFactory, BoosterOptions}
 import io.github.metarank.ltrlib.booster.{Booster, BoosterDataset}
 import io.github.metarank.ltrlib.metric.Metric
 import io.github.metarank.ltrlib.model.Dataset
 
-case class LambdaMART(
+case class LambdaMART[D, T <: Booster[D]](
     dataset: Dataset,
     options: BoosterOptions,
-    boosterBuilder: (BoosterDataset, BoosterOptions) => Booster
-) extends Ranker[Booster] {
+    booster: BoosterFactory[D, T]
+) extends Ranker[T] {
 
-  override def fit(): Booster = {
+  override def fit(): T = {
     val x     = new Array[Double](dataset.itemCount * dataset.desc.dim)
     val label = new Array[Double](dataset.itemCount)
     val qid   = new Array[Int](dataset.itemCount)
@@ -41,26 +41,17 @@ case class LambdaMART(
       .map(_._2)
       .toArray
 
-    val train = BoosterDataset(dataset, x, label, qid2, dataset.itemCount, dataset.desc.dim)
-
-    val boosterModel = boosterBuilder(train, options)
-    cfor(0 until 100) { i =>
+    val train        = BoosterDataset(dataset, x, label, qid2, dataset.itemCount, dataset.desc.dim)
+    val trainDataset = booster.formatData(train)
+    val boosterModel = booster(trainDataset, options)
+    cfor(0 until options.trees) { i =>
       {
-        boosterModel.trainOneIteration()
-        val err = boosterModel.evalMetric()
+        boosterModel.trainOneIteration(trainDataset)
+        val err = boosterModel.evalMetric(trainDataset)
         logger.info(s"[$i] err = $err")
       }
     }
     boosterModel
   }
 
-  override def eval(model: Booster, data: Dataset, metric: Metric): Double = {
-    val yhat = for {
-      group <- data.groups
-    } yield {
-      model.predictMat(group.values, group.rows, group.columns)
-    }
-    val y = data.groups.map(_.labels)
-    metric.eval(y.toArray, yhat.toArray)
-  }
 }
