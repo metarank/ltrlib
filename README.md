@@ -16,9 +16,19 @@ human-friendly API. Currently, is under an active development.
 
 ## Installation
 
-libLTR is not yet published to maven-central, so there is no easy way of plugging it into your project. But as it's
-still not yet ready for production use, it should be fine. You can clone the repo and play with it in your IDE.
+libLTR is published to maven-central for scala 2.12 and 2.13, so for SBT, add this snippet to `build.sbt`:
+```scala
+libraryDependencies += "io.github.metarank" %% "ltrlib" % "0.1.2"
+```
 
+For maven:
+```xml
+<dependency>
+  <groupId>io.github.metarank</groupId>
+  <artifactId>ltrlib_2.12</artifactId>
+  <version>0.1.2</version>
+</dependency>
+```
 ## Usage
 
 Get LETOR dataset from [https://github.com/dmlc/xgboost/tree/master/demo/rank](https://github.com/dmlc/xgboost/tree/master/demo/rank), then:
