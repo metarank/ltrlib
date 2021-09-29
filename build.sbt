@@ -2,15 +2,17 @@ import Deps._
 
 name := "ltrlib"
 
-version := "0.1.2"
+version := "0.1.3"
 
-scalaVersion := "2.12.14"
+scalaVersion := "2.12.15"
 
-crossScalaVersions := List("2.13.6", "2.12.14")
+crossScalaVersions := List("2.13.6", "2.12.15")
 
 organization := "io.github.metarank"
 
 Test / logBuffered := false
+
+Test / parallelExecution := false
 
 scalacOptions ++= Seq("-feature", "-deprecation")
 

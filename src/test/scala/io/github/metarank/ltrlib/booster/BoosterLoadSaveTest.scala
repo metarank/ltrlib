@@ -6,7 +6,7 @@ import io.github.metarank.ltrlib.ranking.pairwise.LambdaMART
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
 
-class BoosterTest extends AnyFlatSpec with Matchers {
+class BoosterLoadSaveTest extends AnyFlatSpec with Matchers {
   it should "load-save the lightgbm model" in {
     roundtrip(LightGBMBooster)
   }

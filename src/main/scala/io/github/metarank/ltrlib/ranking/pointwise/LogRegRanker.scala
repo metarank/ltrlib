@@ -136,22 +136,27 @@ object LogRegRanker {
   case class SingularFeatureWeight(feature: SingularFeature, weight: Double)     extends FeatureWeight
   case class VectorFeatureWeight(feature: VectorFeature, weights: Array[Double]) extends FeatureWeight
   case class LogRegModel(weights: List[FeatureWeight], intercept: Double) extends Model {
+    val weightsVector = new ArrayRealVector(weights.flatMap {
+      case SingularFeatureWeight(_, weight) => List(weight)
+      case VectorFeatureWeight(_, weights)  => weights.toList
+    }.toArray)
+
     override def eval(data: Dataset, metric: Metric): Double = {
-      val w = new ArrayRealVector(weights.flatMap {
-        case SingularFeatureWeight(_, weight) => List(weight)
-        case VectorFeatureWeight(_, weights)  => weights.toList
-      }.toArray)
       val y = data.groups.map(_.labels)
       val yhat = for {
         group <- data.groups
       } yield {
         val pred = new Array[Double](group.rows)
         cfor(0 until group.rows) { row =>
-          pred(row) = intercept + group.getRowVector(row).dotProduct(w)
+          pred(row) = intercept + group.getRowVector(row).dotProduct(weightsVector)
         }
         pred
       }
       metric.eval(y.toArray, yhat.toArray)
+    }
+
+    override def predict(values: RealVector): Double = {
+      intercept + values.dotProduct(weightsVector)
     }
 
   }
