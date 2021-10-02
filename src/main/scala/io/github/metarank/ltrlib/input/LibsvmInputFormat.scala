@@ -68,7 +68,7 @@ object LibsvmInputFormat {
     val label = tokens(0).toInt
     val qid = tokens(1) match {
       case queryPattern(_, id) => id.toInt
-      case _                   => throw new IllegalArgumentException(s"qid format for item '${tokens(1)}' is not supported on row $index")
+      case _ => throw new IllegalArgumentException(s"qid format for item '${tokens(1)}' is not supported on row $index")
     }
     val values = new Array[Double](dim)
     var i      = 2
