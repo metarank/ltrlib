@@ -11,8 +11,6 @@ import io.github.metarank.ltrlib.ranking.Ranker
 import scala.util.Random
 
 case class LogRegRanker(train: Dataset, options: RegressionOptions) extends Ranker[LogRegModel] {
-  val LR     = 0.3
-  val IT     = 200
   val (x, y) = prepare()
 
   def prepare() = {
@@ -35,8 +33,8 @@ case class LogRegRanker(train: Dataset, options: RegressionOptions) extends Rank
   override def fit(): LogRegModel = {
     // fill the data
     val weights = options match {
-      case LogRegRanker.SGD(iterations)                 => trainSGD(x, y, iterations)
-      case LogRegRanker.BatchSGD(iterations, batchSize) => trainBatchSGD(x, y, iterations, batchSize)
+      case LogRegRanker.SGD(iterations, lr)                 => trainSGD(x, y, iterations, lr)
+      case LogRegRanker.BatchSGD(iterations, batchSize, lr) => trainBatchSGD(x, y, iterations, batchSize, lr)
     }
 
     val featureWeights = for {
@@ -50,7 +48,7 @@ case class LogRegRanker(train: Dataset, options: RegressionOptions) extends Rank
     LogRegModel(featureWeights, weights.intercept)
   }
 
-  def trainSGD(x: Array2DRowRealMatrix, y: RealVector, iterations: Int) = {
+  def trainSGD(x: Array2DRowRealMatrix, y: RealVector, iterations: Int, lr: Double) = {
     val weights: RealVector = new ArrayRealVector(train.desc.dim)
     var intercept           = 0.0
     cfor(0 until iterations) { it =>
@@ -63,9 +61,9 @@ case class LogRegRanker(train: Dataset, options: RegressionOptions) extends Rank
             val error = y.getEntry(row) - yhat
             sumError += error * error / x.getRowDimension
             // intercept
-            intercept += LR * 2 * error / x.getRowDimension
+            intercept += lr * 2 * error / x.getRowDimension
             cfor(0 until x.getColumnDimension) { col =>
-              weights.addToEntry(col, LR * 2 * error * r.getEntry(col) / x.getRowDimension)
+              weights.addToEntry(col, lr * 2 * error * r.getEntry(col) / x.getRowDimension)
             }
           }
         }
@@ -75,7 +73,7 @@ case class LogRegRanker(train: Dataset, options: RegressionOptions) extends Rank
     RegWeights(intercept, weights)
   }
 
-  def trainBatchSGD(x: Array2DRowRealMatrix, y: RealVector, iterations: Int, batchSize: Int) = {
+  def trainBatchSGD(x: Array2DRowRealMatrix, y: RealVector, iterations: Int, batchSize: Int, lr: Double) = {
     var weights: RealVector = new ArrayRealVector(train.desc.dim)
     var intercept           = 0.0
     cfor(0 until iterations) { it =>
@@ -98,8 +96,8 @@ case class LogRegRanker(train: Dataset, options: RegressionOptions) extends Rank
           }
         }
         // set weights
-        weights = weights.add(gradient.mapMultiply(2 * LR))
-        intercept += interceptGradient * 2 * LR
+        weights = weights.add(gradient.mapMultiply(2 * lr))
+        intercept += interceptGradient * 2 * lr
         logger.debug(s"[$it] error = $sumError")
       }
     }
@@ -162,8 +160,8 @@ object LogRegRanker {
   }
 
   sealed trait RegressionOptions
-  case class SGD(iterations: Int)                      extends RegressionOptions
-  case class BatchSGD(iterations: Int, batchSize: Int) extends RegressionOptions
+  case class SGD(iterations: Int, learnRate: Double)                      extends RegressionOptions
+  case class BatchSGD(iterations: Int, batchSize: Int, learnRate: Double) extends RegressionOptions
   case class NoOptions()
 
   case class RegWeights(intercept: Double, weights: RealVector)
