@@ -12,9 +12,8 @@ object LetorDataset {
   lazy val test  = load("/mq2008/test.txt.gz")
 
   private def load(path: String) = {
-    val loader  = LibsvmInputFormat(new GZIPInputStream(Resource.my.getAsStream(path)))
     val spec    = DatasetDescriptor((1 to 46).map(i => SingularFeature(s"f$i")).toList)
-    val queries = loader.load(spec)
+    val queries = LibsvmInputFormat.load(new GZIPInputStream(Resource.my.getAsStream(path)), spec)
     Dataset(spec, queries)
   }
 }

@@ -16,12 +16,12 @@ object Main {
   val prefix = "/home/shutty/work/metarank/c14_ltr_challenge"
   def main(args: Array[String]): Unit = {
     val desc  = DatasetDescriptor((0 until 700).map(i => SingularFeature(s"f$i")).toList)
-    val train = Dataset(desc, LibsvmInputFormat(File(s"$prefix/set2.train.txt").newInputStream).load(desc))
-    val test  = Dataset(desc, LibsvmInputFormat(File(s"$prefix/set2.test.txt").newInputStream).load(desc))
+    val train = Dataset(desc, LibsvmInputFormat.load(File(s"$prefix/set2.train.txt").newInputStream, desc))
+    val test  = Dataset(desc, LibsvmInputFormat.load(File(s"$prefix/set2.test.txt").newInputStream, desc))
     val opts  = BoosterOptions()
     val xgb   = trainModel(LambdaMART(train, opts, XGBoostBooster), NDCG(30), test)
     val lgbm  = trainModel(LambdaMART(train, opts, LightGBMBooster), NDCG(30), test)
-    val lr    = trainModel(LogRegRanker(train, BatchSGD(100, 1000)), NDCG(30), test)
+    val lr    = trainModel(LogRegRanker(train, BatchSGD(100, 1000, 0.01)), NDCG(30), test)
     val rand  = trainModel(RandomRanker(), NDCG(30), test)
     println(s"lgbm=$lgbm xgb=$xgb logreg=$lr rand=$rand")
   }

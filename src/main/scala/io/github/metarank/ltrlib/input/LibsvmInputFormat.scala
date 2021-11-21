@@ -5,8 +5,8 @@ import io.github.metarank.ltrlib.model.{DatasetDescriptor, LabeledItem, Query}
 import java.io.{BufferedInputStream, BufferedReader, InputStream, InputStreamReader}
 import scala.collection.mutable
 
-case class LibsvmInputFormat(data: InputStream) extends InputFormat {
-  override def load(desc: DatasetDescriptor): List[Query] = {
+object LibsvmInputFormat extends InputFormat {
+  override def load(data: InputStream, desc: DatasetDescriptor): List[Query] = {
     val lines           = new BufferedReader(new InputStreamReader(data))
     val groups          = mutable.ArrayBuffer[Query]()
     var lastGroup       = Integer.MIN_VALUE
@@ -55,9 +55,6 @@ case class LibsvmInputFormat(data: InputStream) extends InputFormat {
     groups.toList
   }
 
-}
-
-object LibsvmInputFormat {
   val queryPattern = "(qid:)?([0-9]+)".r
   def parseLine(dim: Int, line: String, index: Int = 0): LabeledItem = {
     val tokens = line.split(' ').takeWhile(!_.contains('#'))
