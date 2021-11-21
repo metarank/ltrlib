@@ -6,7 +6,7 @@ import java.io.{BufferedInputStream, BufferedReader, InputStream, InputStreamRea
 import scala.collection.mutable
 
 object LibsvmInputFormat extends InputFormat {
-  override def load(data: InputStream, desc: DatasetDescriptor): List[Query] = {
+  def load(data: InputStream, desc: DatasetDescriptor): List[Query] = {
     val lines           = new BufferedReader(new InputStreamReader(data))
     val groups          = mutable.ArrayBuffer[Query]()
     var lastGroup       = Integer.MIN_VALUE
