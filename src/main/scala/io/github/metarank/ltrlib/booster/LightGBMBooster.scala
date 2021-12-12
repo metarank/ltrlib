@@ -21,6 +21,7 @@ object LightGBMBooster extends BoosterFactory[LGBMDataset, LightGBMBooster] {
     val ds = LGBMDataset.createFromMat(d.data, d.rows, d.cols, true, "")
     ds.setField("label", d.labels.map(_.toFloat))
     ds.setField("group", d.groups)
+    ds.setFeatureNames(d.featureNames)
     ds
   }
   def apply(string: String): LightGBMBooster = {
