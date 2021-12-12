@@ -5,7 +5,7 @@ import io.github.metarank.ltrlib.ranking.Ranker
 import io.github.metarank.ltrlib.booster.Booster.{BoosterFactory, BoosterOptions}
 import io.github.metarank.ltrlib.booster.{Booster, BoosterDataset}
 import io.github.metarank.ltrlib.metric.Metric
-import io.github.metarank.ltrlib.model.Dataset
+import io.github.metarank.ltrlib.model.{Dataset, Feature}
 
 case class LambdaMART[D, T <: Booster[D]](
     dataset: Dataset,
@@ -41,7 +41,11 @@ case class LambdaMART[D, T <: Booster[D]](
       .map(_._2)
       .toArray
 
-    val train        = BoosterDataset(dataset, x, label, qid2, dataset.itemCount, dataset.desc.dim)
+    val featureNames = dataset.desc.features.flatMap {
+      case Feature.SingularFeature(name) => List(name)
+      case Feature.VectorFeature(name, size) => (0 until size).map(i => s"${name}_$i")
+    }
+    val train        = BoosterDataset(dataset, x, label, qid2, dataset.itemCount, dataset.desc.dim, featureNames.toArray)
     val trainDataset = booster.formatData(train)
     val boosterModel = booster(trainDataset, options)
     cfor(0 until options.trees) { i =>
