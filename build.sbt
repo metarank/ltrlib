@@ -29,7 +29,7 @@ libraryDependencies ++= Seq(
   "io.github.metarank"      % "lightgbm4j"              % "3.3.1-1",
   "io.github.metarank"      % "xgboost-java"            % "1.3.3-3",
   "com.o19s"                % "RankyMcRankFace"         % "0.2.0",
-  "com.opencsv"             % "opencsv"                 % "5.5.2",
+  "com.opencsv"             % "opencsv"                 % "5.6",
   "org.scala-lang.modules" %% "scala-collection-compat" % "2.6.0"
 )
 
