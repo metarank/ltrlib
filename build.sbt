@@ -30,7 +30,7 @@ libraryDependencies ++= Seq(
   "io.github.metarank"      % "xgboost-java"            % "1.3.3-3",
   "com.o19s"                % "RankyMcRankFace"         % "0.2.0",
   "com.opencsv"             % "opencsv"                 % "5.5.2",
-  "org.scala-lang.modules" %% "scala-collection-compat" % "2.6.0"
+  "org.scala-lang.modules" %% "scala-collection-compat" % "2.7.0"
 )
 
 sonatypeProfileName := "io.github.metarank"
