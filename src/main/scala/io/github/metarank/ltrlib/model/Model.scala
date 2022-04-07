@@ -20,8 +20,8 @@ trait Model {
     */
   def predict(values: RealVector): Double
 
-  /** Make batch prediction, default impl falling back to per-row predict.
-    * You should overload it for better performance.
+  /** Make batch prediction, default impl falling back to per-row predict. You should overload it for better
+    * performance.
     * @param values
     * @param rows
     * @param cols
