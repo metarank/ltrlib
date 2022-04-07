@@ -2,7 +2,7 @@ import Deps._
 
 name := "ltrlib"
 
-version := "0.1.6"
+version := "0.1.7"
 
 scalaVersion := "2.12.15"
 
@@ -26,11 +26,11 @@ libraryDependencies ++= Seq(
   "org.slf4j"               % "slf4j-simple"            % slf4jversion     % Test,
   "org.apache.commons"      % "commons-math3"           % "3.6.1",
   "io.github.metarank"     %% "cfor"                    % "0.2",
-  "io.github.metarank"      % "lightgbm4j"              % "3.3.1-1",
+  "io.github.metarank"      % "lightgbm4j"              % "3.3.1-2",
   "io.github.metarank"      % "xgboost-java"            % "1.3.3-3",
   "com.o19s"                % "RankyMcRankFace"         % "0.2.0",
-  "com.opencsv"             % "opencsv"                 % "5.5.2",
-  "org.scala-lang.modules" %% "scala-collection-compat" % "2.6.0"
+  "com.opencsv"             % "opencsv"                 % "5.6",
+  "org.scala-lang.modules" %% "scala-collection-compat" % "2.7.0"
 )
 
 sonatypeProfileName := "io.github.metarank"
