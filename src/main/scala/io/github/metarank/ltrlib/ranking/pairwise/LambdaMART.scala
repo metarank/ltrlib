@@ -32,7 +32,7 @@ case class LambdaMART[D, T <: Booster[D]](
         dataset.desc.dim,
         featureNames.toArray
       )
-    val trainDatasetNative = booster.formatData(train)
+    val trainDatasetNative = booster.formatData(train, None)
     val testDatasetNative = for {
       testDataset <- testDatasetOption
       testDs = LMartDataset.apply(testDataset)
@@ -46,7 +46,8 @@ case class LambdaMART[D, T <: Booster[D]](
           testDataset.itemCount,
           testDataset.desc.dim,
           featureNames.toArray
-        )
+        ),
+        Some(trainDatasetNative)
       )
     }
     val boosterModel = booster(trainDatasetNative, options)

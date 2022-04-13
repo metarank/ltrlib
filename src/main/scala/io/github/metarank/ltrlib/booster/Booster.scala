@@ -9,6 +9,7 @@ trait Booster[D] extends Model {
   def trainOneIteration(dataset: D): Unit
   def evalMetric(dataset: D): Double
   def predictMat(values: Array[Double], rows: Int, cols: Int): Array[Double]
+  def weights(): Array[Double]
 
   override def predict(values: RealMatrix): ArrayRealVector = {
     val rows = values.getRowDimension
@@ -43,7 +44,7 @@ object Booster {
 
   trait BoosterFactory[D, T <: Booster[D]] {
     def apply(string: String): T
-    def formatData(ds: BoosterDataset): D
+    def formatData(ds: BoosterDataset, parent: Option[D]): D
     def apply(dataset: D, options: BoosterOptions): T
   }
 }

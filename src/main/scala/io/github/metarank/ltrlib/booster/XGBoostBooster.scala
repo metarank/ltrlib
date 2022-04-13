@@ -1,6 +1,7 @@
 package io.github.metarank.ltrlib.booster
 
 import Booster.{BoosterFactory, BoosterOptions}
+import io.github.metarank.lightgbm4j.LGBMDataset
 import ml.dmlc.xgboost4j.java.{DMatrix, IObjective, XGBoost}
 
 import java.io.{ByteArrayInputStream, ByteArrayOutputStream}
@@ -12,7 +13,7 @@ case class XGBoostBooster(model: ml.dmlc.xgboost4j.java.Booster) extends Booster
   override def trainOneIteration(dataset: DMatrix): Unit = model.update(dataset, 1)
 
   override def evalMetric(dataset: DMatrix): Double = {
-    val result = model.evalSet(Array(dataset), Array("train"), 1)
+    val result = model.evalSet(Array(dataset), Array("test"), 1)
     result.split(':').last.toDouble
   }
 
@@ -34,6 +35,17 @@ case class XGBoostBooster(model: ml.dmlc.xgboost4j.java.Booster) extends Booster
     val base64 = Base64.getEncoder.encodeToString(bytes.toByteArray)
     base64
   }
+
+  override def weights(): Array[Double] = {
+    val names   = (0 until model.getNumFeature.toInt).map(i => s"feature$i").toArray
+    val weights = model.getFeatureScore(names).asScala
+    val result = for {
+      name <- names
+    } yield {
+      weights.get(name).map(_.doubleValue()).getOrElse(0.0)
+    }
+    result
+  }
 }
 
 object XGBoostBooster extends BoosterFactory[DMatrix, XGBoostBooster] {
@@ -42,7 +54,7 @@ object XGBoostBooster extends BoosterFactory[DMatrix, XGBoostBooster] {
     val booster = XGBoost.loadModel(new ByteArrayInputStream(decoded))
     XGBoostBooster(booster)
   }
-  override def formatData(d: BoosterDataset): DMatrix = {
+  override def formatData(d: BoosterDataset, parent: Option[DMatrix]): DMatrix = {
     val mat = new DMatrix(d.data.map(_.toFloat), d.rows, d.cols)
     mat.setLabel(d.labels.map(_.toFloat))
     mat.setGroup(d.groups)
