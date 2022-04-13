@@ -12,7 +12,7 @@ class LambdaMARTTest extends AnyFlatSpec with Matchers {
     val lm      = LambdaMART(LetorDataset.train, BoosterOptions(), LightGBMBooster, Some(LetorDataset.test))
     val booster = lm.fit()
     val err     = booster.eval(LetorDataset.test, NDCG(100))
-    err should be > 0.50
+    err should be > 0.40
     booster.model.getFeatureNames.length shouldBe 46
   }
 
@@ -20,7 +20,7 @@ class LambdaMARTTest extends AnyFlatSpec with Matchers {
     val lm      = LambdaMART(LetorDataset.train, BoosterOptions(), XGBoostBooster, Some(LetorDataset.test))
     val booster = lm.fit()
     val err     = booster.eval(LetorDataset.test, NDCG(100))
-    err should be > 0.50
+    err should be > 0.40
   }
 
   it should "get weights: xgboost" in {
