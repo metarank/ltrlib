@@ -4,6 +4,7 @@ import io.github.metarank.lightgbm4j.{LGBMBooster, LGBMDataset}
 import Booster.{BoosterFactory, BoosterOptions}
 import io.github.metarank.lightgbm4j.LGBMBooster.FeatureImportanceType
 
+import java.nio.charset.StandardCharsets
 import scala.collection.mutable
 
 case class LightGBMBooster(model: LGBMBooster, datasets: mutable.Map[LGBMDataset, Int] = mutable.Map.empty)
@@ -24,8 +25,8 @@ case class LightGBMBooster(model: LGBMBooster, datasets: mutable.Map[LGBMDataset
     model.predictForMat(values, rows, cols, true)
   }
 
-  override def save(): String =
-    model.saveModelToString(0, 0, FeatureImportanceType.SPLIT)
+  override def save(): Array[Byte] =
+    model.saveModelToString(0, 0, FeatureImportanceType.SPLIT).getBytes(StandardCharsets.UTF_8)
 
   override def weights(): Array[Double] =
     // numIteration=0 means "use all of them"
@@ -41,8 +42,8 @@ object LightGBMBooster extends BoosterFactory[LGBMDataset, LightGBMBooster] {
     ds.setFeatureNames(d.featureNames)
     ds
   }
-  def apply(string: String): LightGBMBooster = {
-    LightGBMBooster(LGBMBooster.loadModelFromString(string))
+  def apply(string: Array[Byte]): LightGBMBooster = {
+    LightGBMBooster(LGBMBooster.loadModelFromString(new String(string, StandardCharsets.UTF_8)))
   }
   def apply(ds: LGBMDataset, options: BoosterOptions) = {
     val paramsMap = Map(
