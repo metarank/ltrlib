@@ -5,7 +5,7 @@ import io.github.metarank.ltrlib.model.{Dataset, Model}
 import org.apache.commons.math3.linear.{Array2DRowRealMatrix, ArrayRealVector, RealMatrix, RealVector}
 
 trait Booster[D] extends Model {
-  def save(): String
+  def save(): Array[Byte]
   def trainOneIteration(dataset: D): Unit
   def evalMetric(dataset: D): Double
   def predictMat(values: Array[Double], rows: Int, cols: Int): Array[Double]
@@ -43,7 +43,7 @@ object Booster {
   case class BoosterOptions(trees: Int = 100, learningRate: Double = 0.1, ndcgCutoff: Int = 10, maxDepth: Int = 5)
 
   trait BoosterFactory[D, T <: Booster[D]] {
-    def apply(string: String): T
+    def apply(string: Array[Byte]): T
     def formatData(ds: BoosterDataset, parent: Option[D]): D
     def apply(dataset: D, options: BoosterOptions): T
   }

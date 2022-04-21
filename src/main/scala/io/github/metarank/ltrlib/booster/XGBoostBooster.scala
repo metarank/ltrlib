@@ -29,11 +29,10 @@ case class XGBoostBooster(model: ml.dmlc.xgboost4j.java.Booster) extends Booster
     out
   }
 
-  override def save(): String = {
+  override def save(): Array[Byte] = {
     val bytes = new ByteArrayOutputStream()
     model.saveModel(bytes)
-    val base64 = Base64.getEncoder.encodeToString(bytes.toByteArray)
-    base64
+    bytes.toByteArray
   }
 
   override def weights(): Array[Double] = {
@@ -49,9 +48,8 @@ case class XGBoostBooster(model: ml.dmlc.xgboost4j.java.Booster) extends Booster
 }
 
 object XGBoostBooster extends BoosterFactory[DMatrix, XGBoostBooster] {
-  override def apply(string: String): XGBoostBooster = {
-    val decoded = Base64.getDecoder.decode(string)
-    val booster = XGBoost.loadModel(new ByteArrayInputStream(decoded))
+  override def apply(string: Array[Byte]): XGBoostBooster = {
+    val booster = XGBoost.loadModel(new ByteArrayInputStream(string))
     XGBoostBooster(booster)
   }
   override def formatData(d: BoosterDataset, parent: Option[DMatrix]): DMatrix = {
