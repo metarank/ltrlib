@@ -63,8 +63,10 @@ object XGBoostBooster extends BoosterFactory[DMatrix, XGBoostBooster] {
   def apply(d: DMatrix, options: BoosterOptions) = {
     val opts = Map[String, Object](
       "objective"   -> "rank:pairwise",
-      "eval_metric" -> "ndcg",
-      "num_round"   -> Integer.valueOf(options.trees)
+      "eval_metric" -> s"ndcg@${options.ndcgCutoff}",
+      "num_round"   -> Integer.valueOf(options.trees),
+      "max_depth"   -> options.maxDepth.toString,
+      "eta"         -> options.learningRate.toString
     ).asJava
     new XGBoostBooster(
       model = XGBoost.train(d, opts, 0, Map.empty.asJava, null, null)
