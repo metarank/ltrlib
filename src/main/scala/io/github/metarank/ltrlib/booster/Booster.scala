@@ -40,7 +40,7 @@ trait Booster[D] extends Model {
 }
 
 object Booster {
-  case class BoosterOptions(trees: Int = 100, learningRate: Double = 0.1)
+  case class BoosterOptions(trees: Int = 100, learningRate: Double = 0.1, ndcgCutoff: Int = 10, maxDepth: Int = 5)
 
   trait BoosterFactory[D, T <: Booster[D]] {
     def apply(string: String): T

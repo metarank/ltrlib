@@ -11,7 +11,7 @@ class LambdaMARTTest extends AnyFlatSpec with Matchers {
   it should "train on letor: lightgbm" in {
     val lm      = LambdaMART(LetorDataset.train, BoosterOptions(), LightGBMBooster, Some(LetorDataset.test))
     val booster = lm.fit()
-    val err     = booster.eval(LetorDataset.test, NDCG(100))
+    val err     = booster.eval(LetorDataset.test, NDCG(10))
     err should be > 0.40
     booster.model.getFeatureNames.length shouldBe 46
   }
@@ -19,7 +19,7 @@ class LambdaMARTTest extends AnyFlatSpec with Matchers {
   it should "train on letor: xgboost" in {
     val lm      = LambdaMART(LetorDataset.train, BoosterOptions(), XGBoostBooster, Some(LetorDataset.test))
     val booster = lm.fit()
-    val err     = booster.eval(LetorDataset.test, NDCG(100))
+    val err     = booster.eval(LetorDataset.test, NDCG(10))
     err should be > 0.40
   }
 

@@ -46,10 +46,12 @@ object LightGBMBooster extends BoosterFactory[LGBMDataset, LightGBMBooster] {
   }
   def apply(ds: LGBMDataset, options: BoosterOptions) = {
     val paramsMap = Map(
-      "objective"      -> "lambdarank",
-      "metric"         -> "ndcg",
-      "num_iterations" -> options.trees.toString,
-      "learning_rate"  -> options.learningRate.toString
+      "objective"                   -> "lambdarank",
+      "metric"                      -> "ndcg",
+      "lambdarank_truncation_level" -> options.ndcgCutoff.toString,
+      "max_depth"                   -> options.maxDepth.toString,
+      "learning_rate"               -> options.learningRate.toString,
+      "num_leaves"                  -> math.round((math.pow(2, options.maxDepth) / 4.0)).toString
     )
     val params = paramsMap.map(kv => s"${kv._1}=${kv._2}").mkString(" ")
     new LightGBMBooster(
