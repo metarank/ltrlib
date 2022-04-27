@@ -34,7 +34,7 @@ case class LightGBMBooster(model: LGBMBooster, datasets: mutable.Map[LGBMDataset
     model.featureImportance(0, FeatureImportanceType.SPLIT)
 }
 
-object LightGBMBooster extends BoosterFactory[LGBMDataset, LightGBMBooster] {
+object LightGBMBooster extends BoosterFactory[LGBMDataset, LightGBMBooster, LightGBMOptions] {
   override def formatData(d: BoosterDataset, parent: Option[LGBMDataset]): LGBMDataset = {
     val ds = LGBMDataset.createFromMat(d.data, d.rows, d.cols, true, "", parent.orNull)
     ds.setField("label", d.labels.map(_.toFloat))
@@ -45,14 +45,15 @@ object LightGBMBooster extends BoosterFactory[LGBMDataset, LightGBMBooster] {
   def apply(string: Array[Byte]): LightGBMBooster = {
     LightGBMBooster(LGBMBooster.loadModelFromString(new String(string, StandardCharsets.UTF_8)))
   }
-  def apply(ds: LGBMDataset, options: BoosterOptions) = {
+  def apply(ds: LGBMDataset, options: LightGBMOptions) = {
     val paramsMap = Map(
       "objective"                   -> "lambdarank",
       "metric"                      -> "ndcg",
       "lambdarank_truncation_level" -> options.ndcgCutoff.toString,
       "max_depth"                   -> options.maxDepth.toString,
       "learning_rate"               -> options.learningRate.toString,
-      "num_leaves"                  -> math.round((math.pow(2, options.maxDepth) / 4.0)).toString
+      "num_leaves"                  -> options.numLeaves.toString,
+      "seed"                        -> options.randomSeed.toString
     )
     val params = paramsMap.map(kv => s"${kv._1}=${kv._2}").mkString(" ")
     new LightGBMBooster(
