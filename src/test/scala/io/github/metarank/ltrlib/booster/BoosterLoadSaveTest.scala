@@ -8,15 +8,15 @@ import org.scalatest.matchers.should.Matchers
 
 class BoosterLoadSaveTest extends AnyFlatSpec with Matchers {
   it should "load-save the lightgbm model" in {
-    roundtrip(LightGBMBooster)
+    roundtrip(LightGBMBooster, LightGBMOptions())
   }
 
   it should "load-save the xgboost model" in {
-    roundtrip(XGBoostBooster)
+    roundtrip(XGBoostBooster, XGBoostOptions())
   }
 
-  def roundtrip[D, T <: Booster[D]](booster: BoosterFactory[D, T]) = {
-    val lm        = LambdaMART(LetorDataset.train, BoosterOptions(trees = 10), booster)
+  def roundtrip[D, T <: Booster[D], O <: BoosterOptions](booster: BoosterFactory[D, T, O], opts: O) = {
+    val lm        = LambdaMART(LetorDataset.train, opts, booster)
     val booster1  = lm.fit()
     val bytes1    = booster1.save()
     val recovered = booster.apply(bytes1)

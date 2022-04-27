@@ -8,10 +8,10 @@ import io.github.metarank.ltrlib.metric.Metric
 import io.github.metarank.ltrlib.model.{Dataset, Feature}
 import io.github.metarank.ltrlib.ranking.pairwise.LambdaMART.LMartDataset
 
-case class LambdaMART[D, T <: Booster[D]](
+case class LambdaMART[D, T <: Booster[D], O <: BoosterOptions](
     dataset: Dataset,
-    options: BoosterOptions,
-    booster: BoosterFactory[D, T],
+    options: O,
+    booster: BoosterFactory[D, T, O],
     testDatasetOption: Option[Dataset] = None
 ) extends Ranker[T] {
 

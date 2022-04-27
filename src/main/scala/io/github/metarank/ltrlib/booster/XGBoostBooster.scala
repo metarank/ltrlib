@@ -47,7 +47,7 @@ case class XGBoostBooster(model: ml.dmlc.xgboost4j.java.Booster) extends Booster
   }
 }
 
-object XGBoostBooster extends BoosterFactory[DMatrix, XGBoostBooster] {
+object XGBoostBooster extends BoosterFactory[DMatrix, XGBoostBooster, XGBoostOptions] {
   override def apply(string: Array[Byte]): XGBoostBooster = {
     val booster = XGBoost.loadModel(new ByteArrayInputStream(string))
     XGBoostBooster(booster)
@@ -58,13 +58,14 @@ object XGBoostBooster extends BoosterFactory[DMatrix, XGBoostBooster] {
     mat.setGroup(d.groups)
     mat
   }
-  def apply(d: DMatrix, options: BoosterOptions) = {
+  def apply(d: DMatrix, options: XGBoostOptions) = {
     val opts = Map[String, Object](
       "objective"   -> "rank:pairwise",
       "eval_metric" -> s"ndcg@${options.ndcgCutoff}",
       "num_round"   -> Integer.valueOf(options.trees),
       "max_depth"   -> options.maxDepth.toString,
-      "eta"         -> options.learningRate.toString
+      "eta"         -> options.learningRate.toString,
+      "seed"        -> options.randomSeed.toString
     ).asJava
     new XGBoostBooster(
       model = XGBoost.train(d, opts, 0, Map.empty.asJava, null, null)

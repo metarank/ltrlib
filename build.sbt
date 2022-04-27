@@ -2,7 +2,7 @@ import Deps._
 
 name := "ltrlib"
 
-version := "0.1.10.1"
+version := "0.1.11"
 
 scalaVersion := "2.12.15"
 
@@ -14,7 +14,7 @@ Test / logBuffered := false
 
 Test / parallelExecution := false
 
-scalacOptions ++= Seq("-feature", "-deprecation")
+scalacOptions ++= Seq("-feature", "-deprecation", "-target:jvm-1.8")
 
 libraryDependencies ++= Seq(
   "org.scalatest"          %% "scalatest"               % scalatestVersion % Test,
