@@ -1,7 +1,15 @@
 package io.github.metarank.ltrlib.ranking.pointwise
 
-import io.github.metarank.ltrlib.model.Feature.{SingularFeature, VectorFeature}
-import LogRegRanker.{LogRegModel, NoOptions, RegWeights, RegressionOptions, SingularFeatureWeight, VectorFeatureWeight}
+import io.github.metarank.ltrlib.model.Feature.{CategoryFeature, SingularFeature, VectorFeature}
+import LogRegRanker.{
+  CategoryFeatureWeight,
+  LogRegModel,
+  NoOptions,
+  RegWeights,
+  RegressionOptions,
+  SingularFeatureWeight,
+  VectorFeatureWeight
+}
 import org.apache.commons.math3.linear.{Array2DRowRealMatrix, ArrayRealVector, RealVector}
 import io.github.metarank.cfor._
 import io.github.metarank.ltrlib.metric.Metric
@@ -42,6 +50,7 @@ case class LogRegRanker(train: Dataset, options: RegressionOptions) extends Rank
     } yield {
       feature match {
         case f @ SingularFeature(_)     => SingularFeatureWeight(f, weights.weights.getEntry(offset))
+        case f @ CategoryFeature(_)     => CategoryFeatureWeight(f, weights.weights.getEntry(offset))
         case f @ VectorFeature(_, size) => VectorFeatureWeight(f, weights.weights.getSubVector(offset, size).toArray)
       }
     }
@@ -132,10 +141,12 @@ case class LogRegRanker(train: Dataset, options: RegressionOptions) extends Rank
 object LogRegRanker {
   sealed trait FeatureWeight
   case class SingularFeatureWeight(feature: SingularFeature, weight: Double)     extends FeatureWeight
+  case class CategoryFeatureWeight(feature: CategoryFeature, weight: Double)     extends FeatureWeight
   case class VectorFeatureWeight(feature: VectorFeature, weights: Array[Double]) extends FeatureWeight
   case class LogRegModel(weights: List[FeatureWeight], intercept: Double) extends Model {
     val weightsVector = new ArrayRealVector(weights.flatMap {
       case SingularFeatureWeight(_, weight) => List(weight)
+      case CategoryFeatureWeight(_, weight) => List(weight)
       case VectorFeatureWeight(_, weights)  => weights.toList
     }.toArray)
 

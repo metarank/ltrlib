@@ -1,7 +1,7 @@
 package io.github.metarank.ltrlib.booster
 
 import io.github.metarank.lightgbm4j.{LGBMBooster, LGBMDataset}
-import Booster.{BoosterFactory, BoosterOptions}
+import Booster.{BoosterFactory, BoosterOptions, DatasetOptions}
 import io.github.metarank.lightgbm4j.LGBMBooster.FeatureImportanceType
 
 import java.nio.charset.StandardCharsets
@@ -45,7 +45,7 @@ object LightGBMBooster extends BoosterFactory[LGBMDataset, LightGBMBooster, Ligh
   def apply(string: Array[Byte]): LightGBMBooster = {
     LightGBMBooster(LGBMBooster.loadModelFromString(new String(string, StandardCharsets.UTF_8)))
   }
-  def apply(ds: LGBMDataset, options: LightGBMOptions) = {
+  override def apply(ds: LGBMDataset, options: LightGBMOptions, dso: DatasetOptions) = {
     val paramsMap = Map(
       "objective"                   -> "lambdarank",
       "metric"                      -> "ndcg",
@@ -53,7 +53,8 @@ object LightGBMBooster extends BoosterFactory[LGBMDataset, LightGBMBooster, Ligh
       "max_depth"                   -> options.maxDepth.toString,
       "learning_rate"               -> options.learningRate.toString,
       "num_leaves"                  -> options.numLeaves.toString,
-      "seed"                        -> options.randomSeed.toString
+      "seed"                        -> options.randomSeed.toString,
+      "categorical_feature"         -> dso.categoryFeatures.mkString(",")
     )
     val params = paramsMap.map(kv => s"${kv._1}=${kv._2}").mkString(" ")
     new LightGBMBooster(

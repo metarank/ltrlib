@@ -10,4 +10,8 @@ object Feature {
     override lazy val size = 1
   }
   case class VectorFeature(name: String, size: Int) extends Feature
+
+  case class CategoryFeature(name: String) extends Feature {
+    override lazy val size = 1
+  }
 }
