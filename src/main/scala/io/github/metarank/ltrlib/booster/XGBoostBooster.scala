@@ -1,6 +1,6 @@
 package io.github.metarank.ltrlib.booster
 
-import Booster.{BoosterFactory, BoosterOptions}
+import Booster.{BoosterFactory, BoosterOptions, DatasetOptions}
 import io.github.metarank.lightgbm4j.LGBMDataset
 import ml.dmlc.xgboost4j.java.{DMatrix, IObjective, XGBoost}
 
@@ -18,7 +18,7 @@ case class XGBoostBooster(model: ml.dmlc.xgboost4j.java.Booster) extends Booster
   }
 
   override def predictMat(values: Array[Double], rows: Int, cols: Int): Array[Double] = {
-    val mat    = new DMatrix(values.map(_.toFloat), rows, cols)
+    val mat    = new DMatrix(values.map(_.toFloat), rows, cols, 0.0f)
     val result = model.predict(mat)
     val out    = new Array[Double](rows)
     var i      = 0
@@ -53,12 +53,12 @@ object XGBoostBooster extends BoosterFactory[DMatrix, XGBoostBooster, XGBoostOpt
     XGBoostBooster(booster)
   }
   override def formatData(d: BoosterDataset, parent: Option[DMatrix]): DMatrix = {
-    val mat = new DMatrix(d.data.map(_.toFloat), d.rows, d.cols)
+    val mat = new DMatrix(d.data.map(_.toFloat), d.rows, d.cols, 0.0f)
     mat.setLabel(d.labels.map(_.toFloat))
     mat.setGroup(d.groups)
     mat
   }
-  def apply(d: DMatrix, options: XGBoostOptions) = {
+  override def apply(d: DMatrix, options: XGBoostOptions, dso: DatasetOptions) = {
     val opts = Map[String, Object](
       "objective"   -> "rank:pairwise",
       "eval_metric" -> s"ndcg@${options.ndcgCutoff}",

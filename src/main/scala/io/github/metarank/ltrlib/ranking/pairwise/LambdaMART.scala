@@ -2,7 +2,7 @@ package io.github.metarank.ltrlib.ranking.pairwise
 
 import io.github.metarank.cfor.cfor
 import io.github.metarank.ltrlib.ranking.Ranker
-import io.github.metarank.ltrlib.booster.Booster.{BoosterFactory, BoosterOptions}
+import io.github.metarank.ltrlib.booster.Booster.{BoosterFactory, BoosterOptions, DatasetOptions}
 import io.github.metarank.ltrlib.booster.{Booster, BoosterDataset}
 import io.github.metarank.ltrlib.metric.Metric
 import io.github.metarank.ltrlib.model.{Dataset, Feature}
@@ -19,7 +19,14 @@ case class LambdaMART[D, T <: Booster[D], O <: BoosterOptions](
 
     val featureNames = dataset.desc.features.flatMap {
       case Feature.SingularFeature(name)     => List(name)
+      case Feature.CategoryFeature(name)     => List(name)
       case Feature.VectorFeature(name, size) => (0 until size).map(i => s"${name}_$i")
+    }
+    val categorial = for {
+      cat    <- dataset.desc.features.collect { case c: Feature.CategoryFeature => c }
+      offset <- dataset.desc.offsets.get(cat)
+    } yield {
+      offset
     }
     val trainDs = LMartDataset(dataset)
     val train =
@@ -50,7 +57,7 @@ case class LambdaMART[D, T <: Booster[D], O <: BoosterOptions](
         Some(trainDatasetNative)
       )
     }
-    val boosterModel = booster(trainDatasetNative, options)
+    val boosterModel = booster.apply(trainDatasetNative, options, DatasetOptions(categorial))
     cfor(0 until options.trees) { i =>
       {
         boosterModel.trainOneIteration(trainDatasetNative)

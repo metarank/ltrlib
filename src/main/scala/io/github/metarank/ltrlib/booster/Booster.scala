@@ -40,6 +40,7 @@ trait Booster[D] extends Model {
 }
 
 object Booster {
+  case class DatasetOptions(categoryFeatures: List[Int])
   trait BoosterOptions {
     def trees: Int
     def learningRate: Double
@@ -51,6 +52,6 @@ object Booster {
   trait BoosterFactory[D, T <: Booster[D], O <: BoosterOptions] {
     def apply(string: Array[Byte]): T
     def formatData(ds: BoosterDataset, parent: Option[D]): D
-    def apply(dataset: D, options: O): T
+    def apply(dataset: D, options: O, dso: DatasetOptions): T
   }
 }
