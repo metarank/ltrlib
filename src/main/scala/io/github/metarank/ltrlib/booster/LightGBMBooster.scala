@@ -2,6 +2,7 @@ package io.github.metarank.ltrlib.booster
 
 import io.github.metarank.lightgbm4j.{LGBMBooster, LGBMDataset}
 import Booster.{BoosterFactory, BoosterOptions, DatasetOptions}
+import com.microsoft.ml.lightgbm.PredictionType
 import io.github.metarank.lightgbm4j.LGBMBooster.FeatureImportanceType
 
 import java.nio.charset.StandardCharsets
@@ -22,7 +23,7 @@ case class LightGBMBooster(model: LGBMBooster, datasets: mutable.Map[LGBMDataset
   }
 
   override def predictMat(values: Array[Double], rows: Int, cols: Int): Array[Double] = {
-    model.predictForMat(values, rows, cols, true)
+    model.predictForMat(values, rows, cols, true, PredictionType.C_API_PREDICT_NORMAL)
   }
 
   override def save(): Array[Byte] =
