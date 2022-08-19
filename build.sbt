@@ -2,9 +2,9 @@ import Deps._
 
 name := "ltrlib"
 
-version := "0.1.13"
+version := "0.1.14"
 
-scalaVersion := "2.12.15"
+scalaVersion := "2.12.16"
 
 crossScalaVersions := List("2.13.8", "2.12.16")
 
@@ -20,7 +20,7 @@ libraryDependencies ++= Seq(
   "org.scalatest"          %% "scalatest"               % scalatestVersion % Test,
   "org.scalatest"          %% "scalatest-propspec"      % scalatestVersion % Test,
   "org.scalactic"          %% "scalactic"               % scalatestVersion % Test,
-  "org.scalatestplus"      %% "scalacheck-1-16"         % "3.2.12.0"       % Test,
+  "org.scalatestplus"      %% "scalacheck-1-16"         % "3.2.13.0"       % Test,
   "com.github.pathikrit"   %% "better-files"            % "3.9.1",
   "org.slf4j"               % "slf4j-api"               % slf4jversion,
   "org.slf4j"               % "slf4j-simple"            % slf4jversion     % Test,
@@ -30,7 +30,7 @@ libraryDependencies ++= Seq(
   "io.github.metarank"      % "xgboost-java"            % "1.6.1-2",
   "com.o19s"                % "RankyMcRankFace"         % "0.2.0",
   "com.opencsv"             % "opencsv"                 % "5.6",
-  "org.scala-lang.modules" %% "scala-collection-compat" % "2.8.0"
+  "org.scala-lang.modules" %% "scala-collection-compat" % "2.8.1"
 )
 
 sonatypeProfileName := "io.github.metarank"
