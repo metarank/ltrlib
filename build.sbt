@@ -4,9 +4,9 @@ name := "ltrlib"
 
 version := "0.1.14"
 
-scalaVersion := "2.12.16"
+scalaVersion := "2.12.17"
 
-crossScalaVersions := List("2.13.8", "2.12.16")
+crossScalaVersions := List("2.13.8", "2.12.17")
 
 organization := "io.github.metarank"
 
@@ -28,7 +28,6 @@ libraryDependencies ++= Seq(
   "io.github.metarank"     %% "cfor"                    % "0.2",
   "io.github.metarank"      % "lightgbm4j"              % "3.3.2-1",
   "io.github.metarank"      % "xgboost-java"            % "1.6.1-2",
-  "com.o19s"                % "RankyMcRankFace"         % "0.2.0",
   "com.opencsv"             % "opencsv"                 % "5.7.0",
   "org.scala-lang.modules" %% "scala-collection-compat" % "2.8.1"
 )

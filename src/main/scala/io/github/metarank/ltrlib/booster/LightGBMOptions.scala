@@ -9,5 +9,6 @@ case class LightGBMOptions(
     ndcgCutoff: Int = 10,
     maxDepth: Int = 8,
     randomSeed: Int = Random.nextInt(),
-    numLeaves: Int = 16
+    numLeaves: Int = 16,
+    featureFraction: Double = 1.0
 ) extends BoosterOptions
