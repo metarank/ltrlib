@@ -65,7 +65,8 @@ object XGBoostBooster extends BoosterFactory[DMatrix, XGBoostBooster, XGBoostOpt
       "num_round"   -> Integer.valueOf(options.trees),
       "max_depth"   -> options.maxDepth.toString,
       "eta"         -> options.learningRate.toString,
-      "seed"        -> options.randomSeed.toString
+      "seed"        -> options.randomSeed.toString,
+      "subsample"   -> options.subsample.toString
     ).asJava
     new XGBoostBooster(
       model = XGBoost.train(d, opts, 0, Map.empty.asJava, null, null)
