@@ -27,6 +27,6 @@ object Main {
 
   def trainModel[M <: Model](ranker: Ranker[M], metric: Metric, test: Dataset) = {
     val model = ranker.fit()
-    model.eval(test, metric)
+    model.model.eval(test, metric)
   }
 }

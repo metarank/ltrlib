@@ -13,7 +13,7 @@ import LogRegRanker.{
 import org.apache.commons.math3.linear.{Array2DRowRealMatrix, ArrayRealVector, RealVector}
 import io.github.metarank.cfor._
 import io.github.metarank.ltrlib.metric.Metric
-import io.github.metarank.ltrlib.model.{Dataset, Model}
+import io.github.metarank.ltrlib.model.{Dataset, FitResult, Model}
 import io.github.metarank.ltrlib.ranking.Ranker
 
 import scala.util.Random
@@ -38,7 +38,7 @@ case class LogRegRanker(train: Dataset, options: RegressionOptions) extends Rank
     }
     (x, y)
   }
-  override def fit(): LogRegModel = {
+  override def fit(): FitResult[LogRegModel] = {
     // fill the data
     val weights = options match {
       case LogRegRanker.SGD(iterations, lr)                 => trainSGD(x, y, iterations, lr)
@@ -54,7 +54,7 @@ case class LogRegRanker(train: Dataset, options: RegressionOptions) extends Rank
         case f @ VectorFeature(_, size) => VectorFeatureWeight(f, weights.weights.getSubVector(offset, size).toArray)
       }
     }
-    LogRegModel(featureWeights, weights.intercept)
+    FitResult(LogRegModel(featureWeights, weights.intercept))
   }
 
   def trainSGD(x: Array2DRowRealMatrix, y: RealVector, iterations: Int, lr: Double) = {

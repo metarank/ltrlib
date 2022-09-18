@@ -2,9 +2,9 @@ import Deps._
 
 name := "ltrlib"
 
-version := "0.1.13"
+version := "0.1.14"
 
-scalaVersion := "2.12.15"
+scalaVersion := "2.12.16"
 
 crossScalaVersions := List("2.13.8", "2.12.16")
 
