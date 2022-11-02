@@ -12,10 +12,10 @@ class CSVOutputFormatTest extends AnyFlatSpec with Matchers {
     val desc = DatasetDescriptor(List(SingularFeature("f1"), SingularFeature("f2")))
     val ds   = Dataset(desc, List(Query(desc, List(LabeledItem(1, 1, Array(1.0, 2.0))))))
     val out  = new ByteArrayOutputStream()
-    CSVOutputFormat.write(out, ds)
+    CSVOutputFormat.write(out, ds, true)
     val str = new String(out.toByteArray)
-    str shouldBe """"label","group","f1","f2"
-                   |"1.0","1","1.0","2.0"
+    str shouldBe """label,group,f1,f2
+                   |1.0,1,1.0,2.0
                    |""".stripMargin
   }
 
@@ -23,10 +23,10 @@ class CSVOutputFormatTest extends AnyFlatSpec with Matchers {
     val desc = DatasetDescriptor(List(SingularFeature("f1"), VectorFeature("f2", 2)))
     val ds   = Dataset(desc, List(Query(desc, List(LabeledItem(1, 1, Array(1.0, 2.0, 3.0))))))
     val out  = new ByteArrayOutputStream()
-    CSVOutputFormat.write(out, ds)
+    CSVOutputFormat.write(out, ds, true)
     val str = new String(out.toByteArray)
-    str shouldBe """"label","group","f1","f2_0","f2_1"
-                   |"1.0","1","1.0","2.0","3.0"
+    str shouldBe """label,group,f1,f2_0,f2_1
+                   |1.0,1,1.0,2.0,3.0
                    |""".stripMargin
   }
 }

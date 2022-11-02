@@ -2,9 +2,9 @@ import Deps._
 
 name := "ltrlib"
 
-version := "0.1.15"
+version := "0.1.16"
 
-scalaVersion := "2.12.17"
+scalaVersion := "2.13.10"
 
 crossScalaVersions := List("2.13.10", "2.12.17")
 
@@ -14,7 +14,7 @@ Test / logBuffered := false
 
 Test / parallelExecution := false
 
-scalacOptions ++= Seq("-feature", "-deprecation", "-target:jvm-1.8")
+scalacOptions ++= Seq("-feature", "-deprecation", "-release:8")
 
 libraryDependencies ++= Seq(
   "org.scalatest"          %% "scalatest"               % scalatestVersion % Test,
@@ -28,7 +28,7 @@ libraryDependencies ++= Seq(
   "io.github.metarank"     %% "cfor"                    % "0.2",
   "io.github.metarank"      % "lightgbm4j"              % "3.3.2-2",
   "io.github.metarank"      % "xgboost-java"            % "1.6.1-2",
-  "com.opencsv"             % "opencsv"                 % "5.7.0",
+  "com.opencsv"             % "opencsv"                 % "5.7.1",
   "org.scala-lang.modules" %% "scala-collection-compat" % "2.8.1"
 )
 

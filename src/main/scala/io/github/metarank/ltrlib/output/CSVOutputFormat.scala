@@ -1,19 +1,19 @@
 package io.github.metarank.ltrlib.output
 
-import com.opencsv.CSVWriter
+import com.opencsv.{CSVWriter, CSVWriterBuilder}
 import io.github.metarank.ltrlib.model.{Dataset, DatasetDescriptor, Feature, Query}
 
 import java.io.{OutputStream, OutputStreamWriter}
 
 object CSVOutputFormat extends OutputFormat {
-  def write(stream: OutputStream, data: Dataset) = {
+  def write(stream: OutputStream, data: Dataset, header: Boolean) = {
     val writer = new CSVWriter(new OutputStreamWriter(stream))
-    writer.writeNext(writeHeader(data.desc).toArray)
+    if (header) writer.writeNext(writeHeader(data.desc).toArray, false)
     for {
       query <- data.groups
       line  <- writeGroup(query)
     } {
-      writer.writeNext(line.toArray)
+      writer.writeNext(line.toArray, false)
     }
     writer.close()
     logger.debug(s"wrote ${data.groups.size} groups to CSV file")
