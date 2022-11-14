@@ -23,7 +23,7 @@ object CSVOutputFormat extends OutputFormat {
     rowIndex <- (0 until query.rows).toList
   } yield {
     val row = query.getRow(rowIndex)
-    List(query.labels(rowIndex).toString, query.group.toString) ++ row.map(_.toString)
+    List(query.labels(rowIndex).toString, query.group.toString) ++ row.map(formatNumber)
   }
 
   def writeHeader(desc: DatasetDescriptor): List[String] = {
@@ -33,5 +33,13 @@ object CSVOutputFormat extends OutputFormat {
       case Feature.VectorFeature(name, size) => (0 until size).map(i => s"${name}_$i")
     }
     header
+  }
+
+  def formatNumber(d: Double): String = {
+    if (d % 1 == 0) {
+      s"${d.toInt}"
+    } else {
+      d.toString
+    }
   }
 }
