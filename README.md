@@ -18,7 +18,7 @@ human-friendly API. Currently, is under an active development.
 
 libLTR is published to maven-central for scala 2.12 and 2.13, so for SBT, add this snippet to `build.sbt`:
 ```scala
-libraryDependencies += "io.github.metarank" %% "ltrlib" % "0.1.16"
+libraryDependencies += "io.github.metarank" %% "ltrlib" % "0.1.17"
 ```
 
 For maven:

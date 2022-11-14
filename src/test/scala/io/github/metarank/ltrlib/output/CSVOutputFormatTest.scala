@@ -15,7 +15,7 @@ class CSVOutputFormatTest extends AnyFlatSpec with Matchers {
     CSVOutputFormat.write(out, ds, true)
     val str = new String(out.toByteArray)
     str shouldBe """label,group,f1,f2
-                   |1.0,1,1.0,2.0
+                   |1.0,1,1,2
                    |""".stripMargin
   }
 
@@ -26,7 +26,12 @@ class CSVOutputFormatTest extends AnyFlatSpec with Matchers {
     CSVOutputFormat.write(out, ds, true)
     val str = new String(out.toByteArray)
     str shouldBe """label,group,f1,f2_0,f2_1
-                   |1.0,1,1.0,2.0,3.0
+                   |1.0,1,1,2,3
                    |""".stripMargin
+  }
+
+  it should "format whole nums" in {
+    CSVOutputFormat.formatNumber(1.0) shouldBe "1"
+    CSVOutputFormat.formatNumber(1.2) shouldBe "1.2"
   }
 }
