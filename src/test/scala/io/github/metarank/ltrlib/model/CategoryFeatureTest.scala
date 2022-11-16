@@ -25,7 +25,8 @@ class CategoryFeatureTest extends AnyFlatSpec with Matchers {
     desc = desc,
     groups = (0 until 1000).map(id => generateQuery(desc, 10, id)).toList
   )
-  it should "properly pass cat feature" in {
+
+  it should "properly pass cat feature in lightgbm" in {
     val lm         = LambdaMART(dataset, LightGBMOptions(trees = 10), LightGBMBooster, None)
     val booster    = lm.fit()
     val importance = booster.model.model.getFeatureNames.zip(booster.model.weights())
