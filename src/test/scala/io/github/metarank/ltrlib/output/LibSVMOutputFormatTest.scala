@@ -14,7 +14,7 @@ class LibSVMOutputFormatTest extends AnyFlatSpec with Matchers {
     desc,
     List(
       Query(desc, List(LabeledItem(1, 1, Array(1.0, 2.0)), LabeledItem(0, 1, Array(0.0, 0.0)))),
-      Query(desc, List(LabeledItem(1, 2, Array(1.0, 2.0))))
+      Query(desc, List(LabeledItem(1, 2, Array(1.0, Double.NaN))))
     )
   )
 
@@ -25,7 +25,7 @@ class LibSVMOutputFormatTest extends AnyFlatSpec with Matchers {
     str shouldBe
       """1.0 qid:1 0:1.0 1:2.0
         |0.0 qid:1 
-        |1.0 qid:2 0:1.0 1:2.0
+        |1.0 qid:2 0:1.0 1:NaN
         |""".stripMargin
   }
 
@@ -38,7 +38,7 @@ class LibSVMOutputFormatTest extends AnyFlatSpec with Matchers {
     str shouldBe
       """1.0 0:1.0 1:2.0
         |0.0 
-        |1.0 0:1.0 1:2.0
+        |1.0 0:1.0 1:NaN
         |""".stripMargin
     gstr shouldBe "2\n1\n"
   }

@@ -1,7 +1,6 @@
 package io.github.metarank.ltrlib.ranking.pairwise
 
 import io.github.metarank.ltrlib.dataset.LetorDataset
-import io.github.metarank.ltrlib.booster.Booster.BoosterOptions
 import io.github.metarank.ltrlib.booster.{LightGBMBooster, LightGBMOptions, XGBoostBooster, XGBoostOptions}
 import io.github.metarank.ltrlib.metric.{MSE, NDCG}
 import org.scalatest.flatspec.AnyFlatSpec
