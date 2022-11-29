@@ -29,7 +29,7 @@ libraryDependencies ++= Seq(
   "io.github.metarank"      % "lightgbm4j"              % "3.3.2-3",
   "io.github.metarank"      % "xgboost-java"            % "1.7.1-1",
   "com.opencsv"             % "opencsv"                 % "5.7.1",
-  "org.scala-lang.modules" %% "scala-collection-compat" % "2.8.1"
+  "org.scala-lang.modules" %% "scala-collection-compat" % "2.9.0"
 )
 
 sonatypeProfileName := "io.github.metarank"
