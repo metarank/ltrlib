@@ -57,7 +57,7 @@ case class LambdaMART[D, T <: Booster[D], O <: BoosterOptions](
         Some(trainDatasetNative)
       )
     }
-    val boosterModel = booster.apply(trainDatasetNative, options, DatasetOptions(categorial))
+    val boosterModel = booster.apply(trainDatasetNative, options, DatasetOptions(categorial, dataset.desc.dim))
     val its = for {
       it <- 0 until options.trees
     } yield {

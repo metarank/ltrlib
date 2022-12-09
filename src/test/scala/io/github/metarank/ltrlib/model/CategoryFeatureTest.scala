@@ -1,6 +1,6 @@
 package io.github.metarank.ltrlib.model
 
-import io.github.metarank.ltrlib.booster.{LightGBMBooster, LightGBMOptions}
+import io.github.metarank.ltrlib.booster.{LightGBMBooster, LightGBMOptions, XGBoostBooster, XGBoostOptions}
 import io.github.metarank.ltrlib.dataset.LetorDataset
 import io.github.metarank.ltrlib.metric.NDCG
 import io.github.metarank.ltrlib.model.Feature.{CategoryFeature, SingularFeature}
@@ -30,6 +30,13 @@ class CategoryFeatureTest extends AnyFlatSpec with Matchers {
     val lm         = LambdaMART(dataset, LightGBMOptions(trees = 10), LightGBMBooster, None)
     val booster    = lm.fit()
     val importance = booster.model.model.getFeatureNames.zip(booster.model.weights())
+    importance.length shouldBe 2
+  }
+
+  it should "properly pass cat feature in xgboost" in {
+    val lm         = LambdaMART(dataset, XGBoostOptions(trees = 10), XGBoostBooster, None)
+    val booster    = lm.fit()
+    val importance = booster.model.weights()
     importance.length shouldBe 2
   }
 }

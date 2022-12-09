@@ -68,6 +68,12 @@ object XGBoostBooster extends BoosterFactory[DMatrix, XGBoostBooster, XGBoostOpt
       "seed"        -> options.randomSeed.toString,
       "subsample"   -> options.subsample.toString
     ).asJava
+    val featureTypes = for {
+      i <- (0 until dso.dims).toArray
+    } yield {
+      if (dso.categoryFeatures.contains(i)) "c" else "q"
+    }
+    d.setFeatureTypes(featureTypes)
     new XGBoostBooster(
       model = XGBoost.train(d, opts, 0, Map.empty.asJava, null, null)
     )
