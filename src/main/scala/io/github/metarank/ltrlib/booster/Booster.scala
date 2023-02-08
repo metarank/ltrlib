@@ -6,8 +6,6 @@ import org.apache.commons.math3.linear.{Array2DRowRealMatrix, ArrayRealVector, R
 
 trait Booster[D] extends Model {
   def save(): Array[Byte]
-  def trainOneIteration(dataset: D): Unit
-  def evalMetric(dataset: D): Double
   def predictMat(values: Array[Double], rows: Int, cols: Int): Array[Double]
   def weights(): Array[Double]
 
@@ -52,6 +50,6 @@ object Booster {
   trait BoosterFactory[D, T <: Booster[D], O <: BoosterOptions] {
     def apply(string: Array[Byte]): T
     def formatData(ds: BoosterDataset, parent: Option[D]): D
-    def apply(dataset: D, options: O, dso: DatasetOptions): T
+    def train(dataset: D, test: Option[D], options: O, dso: DatasetOptions): T
   }
 }

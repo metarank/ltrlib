@@ -18,7 +18,7 @@ class BoosterLoadSaveTest extends AnyFlatSpec with Matchers {
   def roundtrip[D, T <: Booster[D], O <: BoosterOptions](booster: BoosterFactory[D, T, O], opts: O) = {
     val lm        = LambdaMART(LetorDataset.train, opts, booster)
     val booster1  = lm.fit()
-    val bytes1    = booster1.model.save()
+    val bytes1    = booster1.save()
     val recovered = booster.apply(bytes1)
     val bytes2    = recovered.save()
     bytes1 shouldBe bytes2

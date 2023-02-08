@@ -5,6 +5,6 @@ import io.github.metarank.ltrlib.model.{Dataset, FitResult, Model}
 import io.github.metarank.ltrlib.util.Logging
 
 trait Ranker[M <: Model] extends Logging {
-  def fit(): FitResult[M]
+  def fit(): M
 
 }

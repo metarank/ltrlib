@@ -4,7 +4,6 @@ import io.github.metarank.cfor.cfor
 import io.github.metarank.ltrlib.ranking.Ranker
 import io.github.metarank.ltrlib.booster.Booster.{BoosterFactory, BoosterOptions, DatasetOptions}
 import io.github.metarank.ltrlib.booster.{Booster, BoosterDataset}
-import io.github.metarank.ltrlib.model.FitResult.IterationResult
 import io.github.metarank.ltrlib.model.{Dataset, Feature, FitResult}
 import io.github.metarank.ltrlib.ranking.pairwise.LambdaMART.LMartDataset
 
@@ -15,7 +14,7 @@ case class LambdaMART[D, T <: Booster[D], O <: BoosterOptions](
     testDatasetOption: Option[Dataset] = None
 ) extends Ranker[T] {
 
-  override def fit(): FitResult[T] = {
+  override def fit(): T = {
 
     val featureNames = dataset.desc.features.flatMap {
       case Feature.SingularFeature(name)     => List(name)
@@ -57,26 +56,9 @@ case class LambdaMART[D, T <: Booster[D], O <: BoosterOptions](
         Some(trainDatasetNative)
       )
     }
-    val boosterModel = booster.apply(trainDatasetNative, options, DatasetOptions(categorial, dataset.desc.dim))
-    val its = for {
-      it <- 0 until options.trees
-    } yield {
-      val start = System.currentTimeMillis()
-      boosterModel.trainOneIteration(trainDatasetNative)
-      val end       = System.currentTimeMillis()
-      val ndcgTrain = boosterModel.evalMetric(trainDatasetNative)
-      val ndcgTest = testDatasetNative match {
-        case Some(value) =>
-          val ndcgTest = boosterModel.evalMetric(value)
-          logger.info(s"[$it] NDCG@train = $ndcgTrain NDCG@test = $ndcgTest")
-          ndcgTest
-        case None =>
-          logger.info(s"[$it] NDCG@train = $ndcgTrain")
-          0.0
-      }
-      IterationResult(it, ndcgTrain, ndcgTest, end - start)
-    }
-    FitResult(boosterModel, its.toList)
+    val boosterModel =
+      booster.train(trainDatasetNative, testDatasetNative, options, DatasetOptions(categorial, dataset.desc.dim))
+    boosterModel
   }
 
 }
