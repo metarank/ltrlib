@@ -4,23 +4,12 @@ import io.github.metarank.lightgbm4j.{LGBMBooster, LGBMDataset}
 import Booster.{BoosterFactory, BoosterOptions, DatasetOptions}
 import com.microsoft.ml.lightgbm.PredictionType
 import io.github.metarank.lightgbm4j.LGBMBooster.FeatureImportanceType
+import io.github.metarank.ltrlib.util.Logging
 
 import java.nio.charset.StandardCharsets
 import scala.collection.mutable
 
-case class LightGBMBooster(model: LGBMBooster, datasets: mutable.Map[LGBMDataset, Int] = mutable.Map.empty)
-    extends Booster[LGBMDataset] {
-  override def trainOneIteration(dataset: LGBMDataset): Unit = model.updateOneIter()
-  override def evalMetric(dataset: LGBMDataset): Double = {
-    datasets.get(dataset) match {
-      case Some(index) => model.getEval(index)(0)
-      case None =>
-        val maxIndex = datasets.values.reduceLeftOption(math.max).getOrElse(0)
-        datasets.put(dataset, maxIndex + 1)
-        model.addValidData(dataset)
-        model.getEval(maxIndex + 1)(0)
-    }
-  }
+case class LightGBMBooster(model: LGBMBooster) extends Booster[LGBMDataset] with Logging {
 
   override def predictMat(values: Array[Double], rows: Int, cols: Int): Array[Double] = {
     model.predictForMat(values, rows, cols, true, PredictionType.C_API_PREDICT_NORMAL)
@@ -35,7 +24,7 @@ case class LightGBMBooster(model: LGBMBooster, datasets: mutable.Map[LGBMDataset
     model.featureImportance(0, FeatureImportanceType.SPLIT)
 }
 
-object LightGBMBooster extends BoosterFactory[LGBMDataset, LightGBMBooster, LightGBMOptions] {
+object LightGBMBooster extends BoosterFactory[LGBMDataset, LightGBMBooster, LightGBMOptions] with Logging {
   override def formatData(d: BoosterDataset, parent: Option[LGBMDataset]): LGBMDataset = {
     val ds = LGBMDataset.createFromMat(d.data, d.rows, d.cols, true, "", parent.orNull)
     ds.setField("label", d.labels.map(_.toFloat))
@@ -46,7 +35,13 @@ object LightGBMBooster extends BoosterFactory[LGBMDataset, LightGBMBooster, Ligh
   def apply(string: Array[Byte]): LightGBMBooster = {
     LightGBMBooster(LGBMBooster.loadModelFromString(new String(string, StandardCharsets.UTF_8)))
   }
-  override def apply(ds: LGBMDataset, options: LightGBMOptions, dso: DatasetOptions) = {
+
+  override def train(
+      dataset: LGBMDataset,
+      test: Option[LGBMDataset],
+      options: LightGBMOptions,
+      dso: DatasetOptions
+  ): LightGBMBooster = {
     val paramsMap = Map(
       "objective"                   -> "lambdarank",
       "metric"                      -> "ndcg",
@@ -59,8 +54,24 @@ object LightGBMBooster extends BoosterFactory[LGBMDataset, LightGBMBooster, Ligh
       "feature_fraction"            -> options.featureFraction.toString
     )
     val params = paramsMap.map(kv => s"${kv._1}=${kv._2}").mkString(" ")
-    new LightGBMBooster(
-      model = LGBMBooster.create(ds, params)
-    )
+    val model  = LGBMBooster.create(dataset, params)
+    test.foreach(t => model.addValidData(t))
+    for {
+      it <- 0 until options.trees
+    } {
+      model.updateOneIter()
+      val ndcgTrain = model.getEval(0)(0)
+      val ndcgTest = test match {
+        case Some(value) =>
+          val ndcgTest = model.getEval(1)(0)
+          logger.info(s"[$it] NDCG@train = $ndcgTrain NDCG@test = $ndcgTest")
+          ndcgTest
+        case None =>
+          logger.info(s"[$it] NDCG@train = $ndcgTrain")
+          0.0
+      }
+    }
+    LightGBMBooster(model)
   }
+
 }

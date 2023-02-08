@@ -2,20 +2,14 @@ package io.github.metarank.ltrlib.booster
 
 import Booster.{BoosterFactory, BoosterOptions, DatasetOptions}
 import io.github.metarank.lightgbm4j.LGBMDataset
+import io.github.metarank.ltrlib.util.Logging
 import ml.dmlc.xgboost4j.java.{DMatrix, IObjective, XGBoost}
 
 import java.io.{ByteArrayInputStream, ByteArrayOutputStream}
 import java.util.Base64
 import scala.jdk.CollectionConverters._
 
-case class XGBoostBooster(model: ml.dmlc.xgboost4j.java.Booster) extends Booster[DMatrix] {
-
-  override def trainOneIteration(dataset: DMatrix): Unit = model.update(dataset, 1)
-
-  override def evalMetric(dataset: DMatrix): Double = {
-    val result = model.evalSet(Array(dataset), Array("test"), 1)
-    result.split(':').last.toDouble
-  }
+case class XGBoostBooster(model: ml.dmlc.xgboost4j.java.Booster) extends Booster[DMatrix] with Logging {
 
   override def predictMat(values: Array[Double], rows: Int, cols: Int): Array[Double] = {
     val mat    = new DMatrix(values.map(_.toFloat), rows, cols, 0.0f)
@@ -47,7 +41,7 @@ case class XGBoostBooster(model: ml.dmlc.xgboost4j.java.Booster) extends Booster
   }
 }
 
-object XGBoostBooster extends BoosterFactory[DMatrix, XGBoostBooster, XGBoostOptions] {
+object XGBoostBooster extends BoosterFactory[DMatrix, XGBoostBooster, XGBoostOptions] with Logging {
   override def apply(string: Array[Byte]): XGBoostBooster = {
     val booster = XGBoost.loadModel(new ByteArrayInputStream(string))
     XGBoostBooster(booster)
@@ -58,7 +52,13 @@ object XGBoostBooster extends BoosterFactory[DMatrix, XGBoostBooster, XGBoostOpt
     mat.setGroup(d.groups)
     mat
   }
-  override def apply(d: DMatrix, options: XGBoostOptions, dso: DatasetOptions) = {
+
+  override def train(
+      dataset: DMatrix,
+      test: Option[DMatrix],
+      options: XGBoostOptions,
+      dso: DatasetOptions
+  ): XGBoostBooster = {
     val opts = Map[String, Object](
       "objective"   -> "rank:pairwise",
       "eval_metric" -> s"ndcg@${options.ndcgCutoff}",
@@ -73,9 +73,30 @@ object XGBoostBooster extends BoosterFactory[DMatrix, XGBoostBooster, XGBoostOpt
     } yield {
       if (dso.categoryFeatures.contains(i)) "c" else "q"
     }
-    d.setFeatureTypes(featureTypes)
-    new XGBoostBooster(
-      model = XGBoost.train(d, opts, 0, Map.empty.asJava, null, null)
-    )
+    dataset.setFeatureTypes(featureTypes)
+    test.foreach(_.setFeatureTypes(featureTypes))
+    val model: ml.dmlc.xgboost4j.java.Booster = XGBoost.train(dataset, opts, 0, Map.empty.asJava, null, null)
+    for {
+      it <- 0 until options.trees
+    } {
+      model.update(dataset, 1)
+      val ndcgTrain = evalMetric(model, dataset)
+      val ndcgTest = test match {
+        case Some(value) =>
+          val ndcgTest = evalMetric(model, value)
+          logger.info(s"[$it] NDCG@train = $ndcgTrain NDCG@test = $ndcgTest")
+          ndcgTest
+        case None =>
+          logger.info(s"[$it] NDCG@train = $ndcgTrain")
+          0.0
+      }
+    }
+    XGBoostBooster(model)
   }
+
+  def evalMetric(model: ml.dmlc.xgboost4j.java.Booster, dataset: DMatrix): Double = {
+    val result = model.evalSet(Array(dataset), Array("test"), 1)
+    result.split(':').last.toDouble
+  }
+
 }
