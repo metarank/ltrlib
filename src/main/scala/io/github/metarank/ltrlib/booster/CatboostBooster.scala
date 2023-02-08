@@ -84,16 +84,20 @@ object CatboostBooster extends BoosterFactory[String, CatboostBooster, CatboostO
       options: CatboostOptions,
       dso: Booster.DatasetOptions
   ): CatboostBooster = {
+    val dir       = File.newTemporaryDirectory("catboost-train").deleteOnExit()
+    val modelFile = dir.createChild("model.bin")
     val opts = Map(
       "--learn-set"     -> dataset,
       "--loss-function" -> "QueryRMSE",
       "--eval-metric"   -> s"NDCG:top=${options.ndcgCutoff}",
       "--iterations"    -> options.trees.toString,
       "--depth"         -> options.maxDepth.toString,
-      "--learning-rate" -> options.learningRate.toString
+      "--learning-rate" -> options.learningRate.toString,
+      "--train-dir"     -> dir.toString(),
+      "--model-file"    -> modelFile.toString()
     ) ++ test.map(t => Map("--test-set" -> t)).getOrElse(Map.empty)
     native_impl.ModeFitImpl(new TVector_TString(opts.flatMap(kv => List(kv._1, kv._2)).toArray))
-    val bytes = File("model.bin").byteArray
+    val bytes = modelFile.byteArray
     apply(bytes)
   }
 }
