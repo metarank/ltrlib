@@ -21,7 +21,7 @@ libraryDependencies ++= Seq(
   "org.scalatest"          %% "scalatest-propspec"      % scalatestVersion % Test,
   "org.scalactic"          %% "scalactic"               % scalatestVersion % Test,
   "org.scalatestplus"      %% "scalacheck-1-16"         % "3.2.14.0"       % Test,
-  ("com.github.pathikrit"  %% "better-files"            % "3.9.1").cross(CrossVersion.for3Use2_13),
+  ("com.github.pathikrit"  %% "better-files"            % "3.9.2").cross(CrossVersion.for3Use2_13),
   "org.slf4j"               % "slf4j-api"               % slf4jversion,
   "org.slf4j"               % "slf4j-simple"            % slf4jversion     % Test,
   "org.apache.commons"      % "commons-math3"           % "3.6.1",
