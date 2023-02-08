@@ -10,7 +10,7 @@ human-friendly API. Currently, is under an active development.
 
 * Logistic regression ranking: SGD, Batch SGD
 * MSE/RMSE loss
-* LambdaMART: XGBoost and LightGBM backends
+* LambdaMART: XGBoost, LightGBM and Catboost backends
 * NDCG, MAP metrics
 * Data formats: libSVM 
 * Native categorical features
@@ -19,7 +19,7 @@ human-friendly API. Currently, is under an active development.
 
 libLTR is published to maven-central for scala 3.x, 2.12 and 2.13, so for SBT, add this snippet to `build.sbt`:
 ```scala
-libraryDependencies += "io.github.metarank" %% "ltrlib" % "0.1.20"
+libraryDependencies += "io.github.metarank" %% "ltrlib" % "0.1.21"
 ```
 
 For maven:
@@ -27,7 +27,7 @@ For maven:
 <dependency>
   <groupId>io.github.metarank</groupId>
   <artifactId>ltrlib_2.13</artifactId>
-  <version>0.1.20</version>
+  <version>0.1.21</version>
 </dependency>
 ```
 ## Usage
@@ -42,7 +42,7 @@ val spec    = DatasetDescriptor((1 to 46).map(i => SingularFeature(s"f$i")).toLi
 val dataset = Dataset(spec, loader.load(spec))
 
 // configured booster 
-val lm      = LambdaMART(dataset, BoosterOptions(), LightGBMBooster)
+val lm      = LambdaMART(dataset, LightGBMOptions(), LightGBMBooster)
 // trained model
 val model   = lm.fit()
 // NDCG error with cutoff on 10th position
