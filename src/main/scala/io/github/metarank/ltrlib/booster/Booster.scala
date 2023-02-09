@@ -45,6 +45,7 @@ object Booster {
     def ndcgCutoff: Int
     def maxDepth: Int
     def randomSeed: Int
+    def earlyStopping: Option[Int]
   }
 
   trait BoosterFactory[D, T <: Booster[D], O <: BoosterOptions] {

@@ -56,19 +56,32 @@ object LightGBMBooster extends BoosterFactory[LGBMDataset, LightGBMBooster, Ligh
     val params = paramsMap.map(kv => s"${kv._1}=${kv._2}").mkString(" ")
     val model  = LGBMBooster.create(dataset, params)
     test.foreach(t => model.addValidData(t))
-    for {
-      it <- 0 until options.trees
-    } {
+    var it           = 0
+    var earlyStop    = false
+    var lastBest     = 0.0
+    var lastBestIter = 0
+    while ((it < options.trees) && !earlyStop) {
+      it += 1
       model.updateOneIter()
       val ndcgTrain = model.getEval(0)(0)
-      val ndcgTest = test match {
+      test match {
         case Some(value) =>
           val ndcgTest = model.getEval(1)(0)
           logger.info(s"[$it] NDCG@train = $ndcgTrain NDCG@test = $ndcgTest")
-          ndcgTest
+          options.earlyStopping match {
+            case Some(esThreshold) =>
+              if (ndcgTest > lastBest) {
+                lastBest = ndcgTest
+                lastBestIter = it
+              }
+              if ((it - lastBestIter) > esThreshold) {
+                logger.info(s"early stop: $esThreshold rounds passed, best=$lastBest last=$ndcgTest")
+                earlyStop = true
+              }
+            case None => //
+          }
         case None =>
           logger.info(s"[$it] NDCG@train = $ndcgTrain")
-          0.0
       }
     }
     LightGBMBooster(model)

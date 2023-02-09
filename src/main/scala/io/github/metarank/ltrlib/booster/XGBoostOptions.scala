@@ -10,5 +10,6 @@ case class XGBoostOptions(
     ndcgCutoff: Int = 10,
     maxDepth: Int = 8,
     randomSeed: Int = math.abs(Random.nextInt()),
-    subsample: Double = 1.0
+    subsample: Double = 1.0,
+    earlyStopping: Option[Int] = None
 ) extends BoosterOptions
