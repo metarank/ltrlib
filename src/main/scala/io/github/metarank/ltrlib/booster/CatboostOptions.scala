@@ -9,5 +9,7 @@ case class CatboostOptions(
     learningRate: Double = 0.1,
     ndcgCutoff: Int = 10,
     maxDepth: Int = 8,
-    randomSeed: Int = Random.nextInt()
+    randomSeed: Int = Random.nextInt(),
+    objective: String = "QueryRMSE",
+    loggingLevel: String = "Verbose"
 ) extends BoosterOptions
