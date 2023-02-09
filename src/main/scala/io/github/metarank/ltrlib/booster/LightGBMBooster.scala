@@ -51,7 +51,8 @@ object LightGBMBooster extends BoosterFactory[LGBMDataset, LightGBMBooster, Ligh
       "num_leaves"                  -> options.numLeaves.toString,
       "seed"                        -> options.randomSeed.toString,
       "categorical_feature"         -> dso.categoryFeatures.mkString(","),
-      "feature_fraction"            -> options.featureFraction.toString
+      "feature_fraction"            -> options.featureFraction.toString,
+      "eval_at"                     -> options.ndcgCutoff.toString
     )
     val params = paramsMap.map(kv => s"${kv._1}=${kv._2}").mkString(" ")
     val model  = LGBMBooster.create(dataset, params)
