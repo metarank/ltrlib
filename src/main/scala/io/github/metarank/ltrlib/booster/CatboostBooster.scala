@@ -2,10 +2,7 @@ package io.github.metarank.ltrlib.booster
 
 import ai.catboost.CatBoostModel
 import better.files.File
-import io.circe.Decoder
 import io.github.metarank.ltrlib.booster.Booster.BoosterFactory
-import io.circe.generic.semiauto._
-import io.github.metarank.ltrlib.booster.CatboostBooster.CatTrainJson.{Iteration, Meta}
 import io.github.metarank.ltrlib.output.LibSVMOutputFormat
 import ru.yandex.catboost.spark.catboost4j_spark.core.src.native_impl.{TVector_TString, native_impl}
 
@@ -43,27 +40,6 @@ case class CatboostBooster(booster: CatBoostModel, bytes: Array[Byte]) extends B
 }
 
 object CatboostBooster extends BoosterFactory[String, CatboostBooster, CatboostOptions] {
-
-  case class CatTrainJson(meta: Meta, iterations: List[Iteration])
-
-  object CatTrainJson {
-    case class Meta(test_sets: List[String], test_metrics: List[TestMetric], learn_metrics: List[TestMetric])
-
-    case class TestMetric(best_value: String, name: String)
-
-    case class Iteration(
-        learn: List[Double],
-        passed_time: Double,
-        remaining_time: Double,
-        iteration: Int,
-        test: List[Double]
-    )
-
-    implicit val metaDecoder: Decoder[Meta]       = deriveDecoder[Meta]
-    implicit val tmDecoder: Decoder[TestMetric]   = deriveDecoder[TestMetric]
-    implicit val itDecoder: Decoder[Iteration]    = deriveDecoder[Iteration]
-    implicit val ctDecoder: Decoder[CatTrainJson] = deriveDecoder[CatTrainJson]
-  }
 
   override def apply(string: Array[Byte]): CatboostBooster = {
     val cb = CatBoostModel.loadModel(new ByteArrayInputStream(string))
