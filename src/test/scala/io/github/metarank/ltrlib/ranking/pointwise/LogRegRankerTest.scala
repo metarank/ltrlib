@@ -13,7 +13,7 @@ import scala.util.Random
 
 class LogRegRankerTest extends AnyFlatSpec with Matchers {
   it should "train simple model" in {
-    val model = LogRegRanker(LetorDataset.train, BatchSGD(30, 20, 0.3)).fit()
+    val model = LogRegRanker(LetorDataset.train).fit(BatchSGD(30, 20, 0.3))
     model.weights.nonEmpty shouldBe true
     val errTest = model.eval(LetorDataset.test, NDCG(100))
     val errRand = RandomRanker().fit().eval(LetorDataset.test, NDCG(100))
@@ -21,19 +21,19 @@ class LogRegRankerTest extends AnyFlatSpec with Matchers {
   }
 
   it should "train simple model: sgd" in {
-    val model = LogRegRanker(LetorDataset.train, SGD(1000, 0.3)).fit()
+    val model = LogRegRanker(LetorDataset.train).fit(SGD(1000, 0.3))
     model.weights.nonEmpty shouldBe true
   }
 
   it should "eval mse" in {
-    val logreg = LogRegRanker(LetorDataset.train, BatchSGD(30, 2000, 0.3))
-    val model  = logreg.fit()
+    val logreg = LogRegRanker(LetorDataset.train)
+    val model  = logreg.fit(BatchSGD(30, 2000, 0.3))
     val mse    = model.eval(LetorDataset.train, MSE)
     mse should be > 1.0
   }
 
   it should "predict one/batch" in {
-    val model     = LogRegRanker(LetorDataset.train, SGD(1000, 0.3)).fit()
+    val model     = LogRegRanker(LetorDataset.train).fit(SGD(1000, 0.3))
     val features  = (1 to 46).map(_ => Random.nextDouble()).toArray
     val resultOne = model.predict(new ArrayRealVector(features))
     val mat       = new Array2DRowRealMatrix(1, 46)
@@ -57,7 +57,7 @@ class LogRegRankerTest extends AnyFlatSpec with Matchers {
         )
       )
     )
-    val model = LogRegRanker(dataset, SGD(10, 0.3)).fit()
+    val model = LogRegRanker(dataset).fit(SGD(10, 0.3))
     model.weights.nonEmpty shouldBe true
   }
 }
