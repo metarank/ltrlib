@@ -23,6 +23,8 @@ case class XGBoostBooster(model: ml.dmlc.xgboost4j.java.Booster) extends Booster
     out
   }
 
+  override def close(): Unit = model.dispose()
+
   override def save(): Array[Byte] = {
     val bytes = new ByteArrayOutputStream()
     model.saveModel(bytes)
@@ -107,6 +109,8 @@ object XGBoostBooster extends BoosterFactory[DMatrix, XGBoostBooster, XGBoostOpt
     }
     XGBoostBooster(model)
   }
+
+  override def closeData(d: DMatrix): Unit = d.dispose()
 
   def evalMetric(model: ml.dmlc.xgboost4j.java.Booster, dataset: DMatrix): Double = {
     val result = model.evalSet(Array(dataset), Array("test"), 1)
