@@ -15,7 +15,12 @@ import org.scalatest.matchers.should.Matchers
 
 class LambdaMARTTest extends AnyFlatSpec with Matchers {
   it should "train on letor: lightgbm" in {
-    val lm      = LambdaMART(LetorDataset.train, LightGBMOptions(), LightGBMBooster, Some(LetorDataset.test))
+    val lm = LambdaMART(
+      LetorDataset.train,
+      LightGBMOptions(earlyStopping = Some(20)),
+      LightGBMBooster,
+      Some(LetorDataset.test)
+    )
     val booster = lm.fit()
     val err     = booster.eval(LetorDataset.test, NDCG(10))
     err should be > 0.40
@@ -23,14 +28,20 @@ class LambdaMARTTest extends AnyFlatSpec with Matchers {
   }
 
   it should "train on letor: xgboost" in {
-    val lm      = LambdaMART(LetorDataset.train, XGBoostOptions(), XGBoostBooster, Some(LetorDataset.test))
+    val lm =
+      LambdaMART(LetorDataset.train, XGBoostOptions(earlyStopping = Some(20)), XGBoostBooster, Some(LetorDataset.test))
     val booster = lm.fit()
     val err     = booster.eval(LetorDataset.test, NDCG(10))
     err should be > 0.40
   }
 
   it should "train on letor: catboost" in {
-    val lm      = LambdaMART(LetorDataset.train, CatboostOptions(), CatboostBooster, Some(LetorDataset.test))
+    val lm = LambdaMART(
+      LetorDataset.train,
+      CatboostOptions(earlyStopping = Some(10)),
+      CatboostBooster,
+      Some(LetorDataset.test)
+    )
     val booster = lm.fit()
     val err     = booster.eval(LetorDataset.test, NDCG(10))
     err should be > 0.40

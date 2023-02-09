@@ -62,6 +62,7 @@ object CatboostBooster extends BoosterFactory[String, CatboostBooster, CatboostO
   ): CatboostBooster = {
     val dir       = File.newTemporaryDirectory("catboost-train").deleteOnExit()
     val modelFile = dir.createChild("model.bin")
+
     val opts = Map(
       "--learn-set"     -> dataset,
       "--loss-function" -> options.objective,
@@ -71,10 +72,19 @@ object CatboostBooster extends BoosterFactory[String, CatboostBooster, CatboostO
       "--learning-rate" -> options.learningRate.toString,
       "--train-dir"     -> dir.toString(),
       "--model-file"    -> modelFile.toString(),
-      "--logging-level" -> "Silent",
+      "--logging-level" -> options.loggingLevel,
       "--random-seed"   -> options.randomSeed.toString
-    ) ++ test.map(t => Map("--test-set" -> t)).getOrElse(Map.empty)
-    native_impl.ModeFitImpl(new TVector_TString(opts.flatMap(kv => List(kv._1, kv._2)).toArray))
+    ).flatMap(kv => List(kv._1, kv._2))
+    val testOpts = test match {
+      case Some(value) => List("--test-set", value)
+      case None        => Nil
+    }
+    val earlyStopOpts = options.earlyStopping match {
+      case Some(value) => List("--od-type", "Iter", "--od-wait", value.toString)
+      case None        => Nil
+    }
+    val finalOpts = List.concat(opts, testOpts, earlyStopOpts)
+    native_impl.ModeFitImpl(new TVector_TString(finalOpts.toArray))
     val bytes = modelFile.byteArray
     apply(bytes)
   }
