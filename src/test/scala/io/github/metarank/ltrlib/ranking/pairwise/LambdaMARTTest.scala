@@ -30,7 +30,7 @@ class LambdaMARTTest extends AnyFlatSpec with Matchers {
   }
 
   it should "train on letor: catboost" in {
-    val lm = LambdaMART(LetorDataset.train, CatboostOptions(trees = 10000), CatboostBooster, Some(LetorDataset.test))
+    val lm      = LambdaMART(LetorDataset.train, CatboostOptions(), CatboostBooster, Some(LetorDataset.test))
     val booster = lm.fit()
     val err     = booster.eval(LetorDataset.test, NDCG(10))
     err should be > 0.40
