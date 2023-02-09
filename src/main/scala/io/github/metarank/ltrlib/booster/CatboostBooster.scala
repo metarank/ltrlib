@@ -64,13 +64,15 @@ object CatboostBooster extends BoosterFactory[String, CatboostBooster, CatboostO
     val modelFile = dir.createChild("model.bin")
     val opts = Map(
       "--learn-set"     -> dataset,
-      "--loss-function" -> "QueryRMSE",
+      "--loss-function" -> options.objective,
       "--eval-metric"   -> s"NDCG:top=${options.ndcgCutoff}",
       "--iterations"    -> options.trees.toString,
       "--depth"         -> options.maxDepth.toString,
       "--learning-rate" -> options.learningRate.toString,
       "--train-dir"     -> dir.toString(),
-      "--model-file"    -> modelFile.toString()
+      "--model-file"    -> modelFile.toString(),
+      "--logging-level" -> "Silent",
+      "--random-seed"   -> options.randomSeed.toString
     ) ++ test.map(t => Map("--test-set" -> t)).getOrElse(Map.empty)
     native_impl.ModeFitImpl(new TVector_TString(opts.flatMap(kv => List(kv._1, kv._2)).toArray))
     val bytes = modelFile.byteArray
