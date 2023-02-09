@@ -11,5 +11,6 @@ case class XGBoostOptions(
     maxDepth: Int = 8,
     randomSeed: Int = math.abs(Random.nextInt()),
     subsample: Double = 1.0,
-    earlyStopping: Option[Int] = None
+    earlyStopping: Option[Int] = None,
+    treeMethod: String = "hist"
 ) extends BoosterOptions
