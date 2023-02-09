@@ -27,15 +27,15 @@ class CategoryFeatureTest extends AnyFlatSpec with Matchers {
   )
 
   it should "properly pass cat feature in lightgbm" in {
-    val lm         = LambdaMART(dataset, LightGBMOptions(trees = 10), LightGBMBooster, None)
-    val booster    = lm.fit()
+    val lm         = LambdaMART(dataset, LightGBMBooster, None)
+    val booster    = lm.fit(LightGBMOptions(trees = 10))
     val importance = booster.model.getFeatureNames.zip(booster.weights())
     importance.length shouldBe 2
   }
 
   it should "properly pass cat feature in xgboost" in {
-    val lm         = LambdaMART(dataset, XGBoostOptions(trees = 10), XGBoostBooster, None)
-    val booster    = lm.fit()
+    val lm         = LambdaMART(dataset, XGBoostBooster, None)
+    val booster    = lm.fit(XGBoostOptions(trees = 10))
     val importance = booster.weights()
     importance.length shouldBe 2
   }

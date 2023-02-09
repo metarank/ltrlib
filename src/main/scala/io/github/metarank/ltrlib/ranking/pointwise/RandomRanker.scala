@@ -9,8 +9,10 @@ import org.apache.commons.math3.linear.RealVector
 
 import scala.util.Random
 
-case class RandomRanker() extends Ranker[RandomModel] {
-  override def fit(): RandomModel = RandomModel(Random.nextInt())
+case class RandomRanker() extends Ranker[RandomModel, Unit] {
+  override def fit(options: Unit): RandomModel = RandomModel(Random.nextInt())
+
+  override def close(): Unit = {}
 
 }
 

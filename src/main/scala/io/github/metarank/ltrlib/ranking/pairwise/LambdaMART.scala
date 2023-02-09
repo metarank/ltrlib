@@ -5,17 +5,32 @@ import io.github.metarank.ltrlib.ranking.Ranker
 import io.github.metarank.ltrlib.booster.Booster.{BoosterFactory, BoosterOptions, DatasetOptions}
 import io.github.metarank.ltrlib.booster.{Booster, BoosterDataset}
 import io.github.metarank.ltrlib.model.{Dataset, Feature, FitResult}
-import io.github.metarank.ltrlib.ranking.pairwise.LambdaMART.LMartDataset
 
 case class LambdaMART[D, T <: Booster[D], O <: BoosterOptions](
-    dataset: Dataset,
-    options: O,
     booster: BoosterFactory[D, T, O],
-    testDatasetOption: Option[Dataset] = None
-) extends Ranker[T] {
+    train: D,
+    test: Option[D],
+    categorical: List[Int],
+    dim: Int
+) extends Ranker[T, O] {
 
-  override def fit(): T = {
+  override def fit(options: O): T = {
+    booster.train(train, test, options, DatasetOptions(categorical, dim))
+  }
 
+  override def close(): Unit = {
+    booster.closeData(train)
+    test.foreach(booster.closeData)
+  }
+
+}
+
+object LambdaMART {
+  def apply[D, T <: Booster[D], O <: BoosterOptions](
+      dataset: Dataset,
+      booster: BoosterFactory[D, T, O],
+      testDatasetOption: Option[Dataset] = None
+  ): LambdaMART[D, T, O] = {
     val featureNames = dataset.desc.features.flatMap {
       case Feature.SingularFeature(name)     => List(name)
       case Feature.CategoryFeature(name)     => List(name)
@@ -56,16 +71,9 @@ case class LambdaMART[D, T <: Booster[D], O <: BoosterOptions](
         Some(trainDatasetNative)
       )
     }
-    val boosterModel =
-      booster.train(trainDatasetNative, testDatasetNative, options, DatasetOptions(categorial, dataset.desc.dim))
-    booster.closeData(trainDatasetNative)
-    testDatasetNative.foreach(booster.closeData)
-    boosterModel
+    new LambdaMART(booster, trainDatasetNative, testDatasetNative, categorial, dataset.desc.dim)
   }
 
-}
-
-object LambdaMART {
   case class LMartDataset(featureValues: Array[Double], labels: Array[Double], groups: Array[Int])
   object LMartDataset {
     def apply(dataset: Dataset): LMartDataset = {

@@ -15,16 +15,16 @@ class LambdaMARTMissingTest extends AnyFlatSpec with Matchers {
   lazy val test  = zeroify(LetorDataset.test)
 
   it should "train on letor: lightgbm" in {
-    val lm      = LambdaMART(train, LightGBMOptions(), LightGBMBooster, Some(test))
-    val booster = lm.fit()
+    val lm      = LambdaMART(train, LightGBMBooster, Some(test))
+    val booster = lm.fit(LightGBMOptions())
     val err     = booster.eval(test, NDCG(10))
     err should be > 0.40
     booster.model.getFeatureNames.length shouldBe 46
   }
 
   it should "train on letor: xgboost" in {
-    val lm      = LambdaMART(train, XGBoostOptions(), XGBoostBooster, Some(test))
-    val booster = lm.fit()
+    val lm      = LambdaMART(train, XGBoostBooster, Some(test))
+    val booster = lm.fit(XGBoostOptions())
     val err     = booster.eval(test, NDCG(10))
     err should be > 0.40
   }

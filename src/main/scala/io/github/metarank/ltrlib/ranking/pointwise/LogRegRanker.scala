@@ -18,8 +18,10 @@ import io.github.metarank.ltrlib.ranking.Ranker
 
 import scala.util.Random
 
-case class LogRegRanker(train: Dataset, options: RegressionOptions) extends Ranker[LogRegModel] {
+case class LogRegRanker(train: Dataset) extends Ranker[LogRegModel, RegressionOptions] {
   val (x, y) = prepare()
+
+  override def close(): Unit = {}
 
   def prepare() = {
     val x   = new Array2DRowRealMatrix(train.itemCount, train.desc.dim)
@@ -38,7 +40,7 @@ case class LogRegRanker(train: Dataset, options: RegressionOptions) extends Rank
     }
     (x, y)
   }
-  override def fit(): LogRegModel = {
+  override def fit(options: RegressionOptions): LogRegModel = {
     // fill the data
     val weights = options match {
       case LogRegRanker.SGD(iterations, lr)                 => trainSGD(x, y, iterations, lr)
