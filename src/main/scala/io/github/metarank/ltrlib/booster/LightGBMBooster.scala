@@ -15,6 +15,8 @@ case class LightGBMBooster(model: LGBMBooster) extends Booster[LGBMDataset] with
     model.predictForMat(values, rows, cols, true, PredictionType.C_API_PREDICT_NORMAL)
   }
 
+  override def close(): Unit = model.close()
+
   override def save(): Array[Byte] =
     model.saveModelToString(0, 0, FeatureImportanceType.SPLIT).getBytes(StandardCharsets.UTF_8)
 
@@ -35,6 +37,8 @@ object LightGBMBooster extends BoosterFactory[LGBMDataset, LightGBMBooster, Ligh
   def apply(string: Array[Byte]): LightGBMBooster = {
     LightGBMBooster(LGBMBooster.loadModelFromString(new String(string, StandardCharsets.UTF_8)))
   }
+
+  override def closeData(d: LGBMDataset): Unit = d.close()
 
   override def train(
       dataset: LGBMDataset,

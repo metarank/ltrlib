@@ -58,6 +58,8 @@ case class LambdaMART[D, T <: Booster[D], O <: BoosterOptions](
     }
     val boosterModel =
       booster.train(trainDatasetNative, testDatasetNative, options, DatasetOptions(categorial, dataset.desc.dim))
+    booster.closeData(trainDatasetNative)
+    testDatasetNative.foreach(booster.closeData)
     boosterModel
   }
 
