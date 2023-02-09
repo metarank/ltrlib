@@ -68,7 +68,8 @@ object XGBoostBooster extends BoosterFactory[DMatrix, XGBoostBooster, XGBoostOpt
       "max_depth"   -> options.maxDepth.toString,
       "eta"         -> options.learningRate.toString,
       "seed"        -> options.randomSeed.toString,
-      "subsample"   -> options.subsample.toString
+      "subsample"   -> options.subsample.toString,
+      "tree_method" -> options.treeMethod
     ).asJava
     val featureTypes = for {
       i <- (0 until dso.dims).toArray
