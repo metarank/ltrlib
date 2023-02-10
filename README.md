@@ -2,6 +2,7 @@
 
 [![CI Status](https://github.com/metarank/ltrlib/workflows/CI/badge.svg)](https://github.com/metarank/ltrlib/actions)
 [![License: Apache 2](https://img.shields.io/badge/License-Apache2-green.svg)](https://opensource.org/licenses/Apache-2.0)
+![Last release](https://img.shields.io/github/release/metarank/ltrlib)
 
 A Java/Scala library to wrap and implement basic learn-to-rank ML algorithms under the same
 human-friendly API. Currently, is under an active development.
@@ -19,7 +20,7 @@ human-friendly API. Currently, is under an active development.
 
 libLTR is published to maven-central for scala 3.x, 2.12 and 2.13, so for SBT, add this snippet to `build.sbt`:
 ```scala
-libraryDependencies += "io.github.metarank" %% "ltrlib" % "0.1.22"
+libraryDependencies += "io.github.metarank" %% "ltrlib" % "0.2.0"
 ```
 
 For maven:
@@ -27,7 +28,7 @@ For maven:
 <dependency>
   <groupId>io.github.metarank</groupId>
   <artifactId>ltrlib_2.13</artifactId>
-  <version>0.1.22</version>
+  <version>0.2.0</version>
 </dependency>
 ```
 ## Usage
@@ -42,9 +43,9 @@ val spec    = DatasetDescriptor((1 to 46).map(i => SingularFeature(s"f$i")).toLi
 val dataset = Dataset(spec, loader.load(spec))
 
 // configured booster 
-val lm      = LambdaMART(dataset, LightGBMOptions(), LightGBMBooster)
+val lm      = LambdaMART(dataset, LightGBMBooster)
 // trained model
-val model   = lm.fit()
+val model   = lm.fit(LightGBMOptions())
 // NDCG error with cutoff on 10th position
 val error   = lm.eval(model, dataset, NDCG(10))
 
