@@ -62,7 +62,7 @@ object LibsvmInputFormat extends InputFormat {
       throw new IllegalArgumentException(
         s"LibSVM format requires at least two columns: label and qid, but got ${tokens.length} on row $index"
       )
-    val label = tokens(0).toInt
+    val label = tokens(0).toDouble
     val qid = tokens(1) match {
       case queryPattern(_, id) => id.toInt
       case _ => throw new IllegalArgumentException(s"qid format for item '${tokens(1)}' is not supported on row $index")
@@ -88,6 +88,6 @@ object LibsvmInputFormat extends InputFormat {
       values(featureIndex - 1) = value // libsvm indexing starts from 1
       i += 1
     }
-    new LabeledItem(label, qid, values)
+    LabeledItem(label, qid, values)
   }
 }
