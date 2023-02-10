@@ -12,5 +12,6 @@ case class CatboostOptions(
     randomSeed: Int = math.abs(Random.nextInt()),
     objective: String = "QueryRMSE",
     loggingLevel: String = "Verbose",
-    earlyStopping: Option[Int] = None
+    earlyStopping: Option[Int] = None,
+    boostingType: String = "Plain"
 ) extends BoosterOptions

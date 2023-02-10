@@ -23,9 +23,9 @@ class LibSVMOutputFormatTest extends AnyFlatSpec with Matchers {
     LibSVMOutputFormat.write(out, ds)
     val str = new String(out.toByteArray)
     str shouldBe
-      """1.0 qid:1 0:1.0 1:2.0
-        |0.0 qid:1 
-        |1.0 qid:2 0:1.0 1:NaN
+      """1 qid:1 0:1.0 1:2.0
+        |0 qid:1
+        |1 qid:2 0:1.0 1:NaN
         |""".stripMargin
   }
 
@@ -36,9 +36,9 @@ class LibSVMOutputFormatTest extends AnyFlatSpec with Matchers {
     val str  = new String(data.toByteArray)
     val gstr = new String(groups.toByteArray)
     str shouldBe
-      """1.0 0:1.0 1:2.0
-        |0.0 
-        |1.0 0:1.0 1:NaN
+      """1 0:1.0 1:2.0
+        |0
+        |1 0:1.0 1:NaN
         |""".stripMargin
     gstr shouldBe "2\n1\n"
   }

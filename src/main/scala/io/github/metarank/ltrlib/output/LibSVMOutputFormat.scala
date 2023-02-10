@@ -10,8 +10,9 @@ object LibSVMOutputFormat extends OutputFormat {
       query <- ds.groups
       rowid <- 0 until query.rows
     } {
-      val row  = query.getRow(rowid).zipWithIndex.filter(_._1 != 0).map(x => s"${x._2 + offset}:${x._1}")
-      val line = s"${query.labels(rowid)} qid:${query.group} ${row.mkString(" ")}\n"
+      val features = query.getRow(rowid).zipWithIndex.filter(_._1 != 0).map(x => s"${x._2 + offset}:${x._1}")
+      val label    = math.round(query.labels(rowid)).toString
+      val line     = (List(label, s"qid:${query.group}") ++ features).mkString("", " ", "\n")
       data.write(line.getBytes())
     }
   }
@@ -24,8 +25,9 @@ object LibSVMOutputFormat extends OutputFormat {
       for {
         rowid <- 0 until query.rows
       } {
-        val row  = query.getRow(rowid).zipWithIndex.filter(_._1 != 0).map(x => s"${x._2}:${x._1}")
-        val line = s"${query.labels(rowid)} ${row.mkString(" ")}\n"
+        val features = query.getRow(rowid).zipWithIndex.filter(_._1 != 0).map(x => s"${x._2}:${x._1}").toList
+        val label    = math.round(query.labels(rowid)).toString
+        val line     = (List(label) ++ features).mkString("", " ", "\n")
         data.write(line.getBytes())
       }
     }

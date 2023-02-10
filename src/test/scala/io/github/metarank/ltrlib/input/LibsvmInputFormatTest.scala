@@ -11,6 +11,10 @@ class LibsvmInputFormatTest extends AnyFlatSpec with Matchers {
     parse1("1 qid:1 1:1", LabeledItem(1, 1, Array(1.0)))
   }
 
+  it should "load 1 feature with double label and qid" in {
+    parse1("1.0 qid:1 1:1", LabeledItem(1, 1, Array(1.0)))
+  }
+
   it should "fail on nan" in {
     Try(LibsvmInputFormat.parseLine(1, "1 qid:1 1:NaN")).isFailure shouldBe true
   }
