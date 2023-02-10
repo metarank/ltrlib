@@ -5,12 +5,12 @@ import io.github.metarank.ltrlib.model.Dataset
 import java.io.OutputStream
 
 object LibSVMOutputFormat extends OutputFormat {
-  def write(data: OutputStream, ds: Dataset, offset: Int = 0) = {
+  def write(data: OutputStream, ds: Dataset) = {
     for {
       query <- ds.groups
       rowid <- 0 until query.rows
     } {
-      val features = query.getRow(rowid).zipWithIndex.filter(_._1 != 0).map(x => s"${x._2 + offset}:${x._1}")
+      val features = query.getRow(rowid).zipWithIndex.filter(_._1 != 0).map(x => s"${x._2 + 1}:${x._1}")
       val label    = math.round(query.labels(rowid)).toString
       val line     = (List(label, s"qid:${query.group}") ++ features).mkString("", " ", "\n")
       data.write(line.getBytes())
@@ -25,7 +25,7 @@ object LibSVMOutputFormat extends OutputFormat {
       for {
         rowid <- 0 until query.rows
       } {
-        val features = query.getRow(rowid).zipWithIndex.filter(_._1 != 0).map(x => s"${x._2}:${x._1}").toList
+        val features = query.getRow(rowid).zipWithIndex.filter(_._1 != 0).map(x => s"${x._2 + 1}:${x._1}").toList
         val label    = math.round(query.labels(rowid)).toString
         val line     = (List(label) ++ features).mkString("", " ", "\n")
         data.write(line.getBytes())
