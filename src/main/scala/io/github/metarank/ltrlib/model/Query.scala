@@ -2,8 +2,10 @@ package io.github.metarank.ltrlib.model
 
 import io.github.metarank.cfor._
 import org.apache.commons.math3.linear.{ArrayRealVector, RealVector}
-case class Query(group: Int, labels: Array[Double], values: Array[Double], columns: Int, rows: Int) {
+case class Query(group: Int, labels: Array[Double], values: Array[Double]) {
   val memUsed                      = labels.length * 8 + values.length * 8
+  val rows                         = labels.length
+  val columns                      = values.length / labels.length
   def getValue(row: Int, col: Int) = values(columns * row + col)
   def getRow(row: Int): Array[Double] = {
     val result = new Array[Double](columns)
@@ -32,6 +34,6 @@ object Query {
       labels(i) = item.label
       System.arraycopy(item.values, 0, data, desc.dim * i, item.values.length)
     }
-    new Query(group, labels, data, desc.dim, values.size)
+    new Query(group, labels, data)
   }
 }

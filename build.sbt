@@ -2,7 +2,7 @@ import Deps._
 
 name := "ltrlib"
 
-version := "0.2.0-M4"
+version := "0.2.1-M3"
 
 scalaVersion := "2.13.10"
 
