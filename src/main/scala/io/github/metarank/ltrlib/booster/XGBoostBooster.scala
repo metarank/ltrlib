@@ -117,11 +117,11 @@ object XGBoostBooster extends BoosterFactory[DMatrix, XGBoostBooster, XGBoostOpt
     var lastBestIter = 0
     while ((it < options.trees) && !earlyStop) {
       it += 1
-      model.update(dataset, 1)
-      val ndcgTrain = evalMetric(model, dataset)
+      model.update(dataset, it)
+      val ndcgTrain = evalMetric(model, dataset, it)
       test match {
         case Some(value) =>
-          val ndcgTest = evalMetric(model, value)
+          val ndcgTest = evalMetric(model, value, it)
           logger.info(
             s"[$it] NDCG@${options.ndcgCutoff}:train = $ndcgTrain NDCG@${options.ndcgCutoff}:test = $ndcgTest"
           )
@@ -147,8 +147,8 @@ object XGBoostBooster extends BoosterFactory[DMatrix, XGBoostBooster, XGBoostOpt
 
   override def closeData(d: DMatrix): Unit = d.dispose()
 
-  def evalMetric(model: ml.dmlc.xgboost4j.java.Booster, dataset: DMatrix): Double = {
-    val result = model.evalSet(Array(dataset), Array("test"), 1)
+  def evalMetric(model: ml.dmlc.xgboost4j.java.Booster, dataset: DMatrix, it: Int): Double = {
+    val result = model.evalSet(Array(dataset), Array("test"), it)
     result.split(':').last.toDouble
   }
 

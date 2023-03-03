@@ -4,7 +4,7 @@ import io.github.metarank.ltrlib.booster.Booster.DatasetOptions
 import io.github.metarank.ltrlib.booster.{BoosterDataset, XGBoostBooster, XGBoostOptions}
 import io.github.metarank.ltrlib.model.Feature.SingularFeature
 import io.github.metarank.ltrlib.model.{Dataset, DatasetDescriptor, Feature, Query}
-import io.github.metarank.ltrlib.ranking.pairwise.LambdaMART.LMartDataset
+import io.github.metarank.ltrlib.ranking.pairwise.LambdaMART.FlattenedDataset
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
 
@@ -107,14 +107,14 @@ class NDCGTest extends AnyFlatSpec with Matchers {
       )
 
     for {
-      _ <- 0 until 100
+      i <- 0 until 100
     } {
       val q1    = makeQuery(1, 1 + Random.nextInt(20), 10)
       val q2    = makeQuery(2, 1 + Random.nextInt(20), 10)
       val q3    = makeQuery(3, 1 + Random.nextInt(20), 10)
       val ds    = dswrap(List(q1, q2, q3), desc)
       val test  = XGBoostBooster.formatData(ds, None)
-      val ndcg1 = XGBoostBooster.evalMetric(booster.model, test)
+      val ndcg1 = XGBoostBooster.evalMetric(booster.model, test, i)
       XGBoostBooster.closeData(test)
       val ndcg2 = booster.eval(ds.original, NDCG(10, nolabels = 1.0))
       math.abs(ndcg1 - ndcg2) should be < 0.001
@@ -124,14 +124,12 @@ class NDCGTest extends AnyFlatSpec with Matchers {
   def makeQuery(group: Int, docs: Int, dim: Int) = Query(
     group = group,
     labels = (0 until docs).map(_ => if (Random.nextBoolean()) 1.0 else 0.0).toArray,
-    values = (0 until docs * dim).map(_ => Random.nextDouble()).toArray,
-    columns = dim,
-    rows = docs
+    values = (0 until docs * dim).map(_ => Random.nextDouble()).toArray
   )
 
   def dswrap(q: List[Query], desc: DatasetDescriptor) = {
     val dataset = Dataset(desc, q)
-    val trainDs = LMartDataset(dataset)
+    val trainDs = FlattenedDataset(dataset)
     val featureNames = dataset.desc.features.flatMap {
       case Feature.SingularFeature(name)     => List(name)
       case Feature.CategoryFeature(name)     => List(name)

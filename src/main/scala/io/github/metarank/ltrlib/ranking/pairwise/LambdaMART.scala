@@ -36,7 +36,7 @@ object LambdaMART {
       case Feature.CategoryFeature(name)     => List(name)
       case Feature.VectorFeature(name, size) => (0 until size).map(i => s"${name}_$i")
     }
-    val trainDs = LMartDataset(dataset)
+    val trainDs = FlattenedDataset(dataset)
     val train =
       BoosterDataset(
         dataset,
@@ -50,7 +50,7 @@ object LambdaMART {
     val trainDatasetNative = booster.formatData(train, None)
     val testDatasetNative = for {
       testDataset <- testDatasetOption
-      testDs = LMartDataset.apply(testDataset)
+      testDs = FlattenedDataset.apply(testDataset)
     } yield {
       booster.formatData(
         BoosterDataset(
@@ -68,38 +68,36 @@ object LambdaMART {
     new LambdaMART(booster, trainDatasetNative, testDatasetNative, train.categoricalIndices, dataset.desc.dim)
   }
 
-  case class LMartDataset(featureValues: Array[Double], labels: Array[Double], groups: Array[Int])
-  object LMartDataset {
-    def apply(dataset: Dataset): LMartDataset = {
+  case class FlattenedDataset(featureValues: Array[Double], labels: Array[Double], groups: Array[Int])
+  object FlattenedDataset {
+    def apply(dataset: Dataset): FlattenedDataset = {
       val featureValues = new Array[Double](dataset.itemCount * dataset.desc.dim)
-      val label         = new Array[Double](dataset.itemCount)
-      val qid           = new Array[Int](dataset.itemCount)
-      var row           = 0
+      val labels        = new Array[Double](dataset.itemCount)
+      val qids          = new Array[Int](dataset.groups.size)
+
+      var row = 0
+      var qid = 0
+      var ind = 0
       for {
         group <- dataset.groups
       } {
-        cfor(group.labels.indices) { item =>
-          {
-            label(row) = group.labels(item)
-            qid(row) = group.group
-            cfor(0 until group.columns) { col =>
-              featureValues(row * dataset.desc.dim + col) = group.getValue(item, col)
-            }
-            row += 1
-          }
-        }
-      }
+        qids(qid) = group.labels.length
 
-      val qid2 = qid
-        .groupBy(identity)
-        .map { case (q, cnt) =>
-          q -> cnt.length
+        var i = 0
+        while (i < group.rows) {
+          labels(row) = group.labels(i)
+          row += 1
+          i += 1
         }
-        .toList
-        .sortBy(_._1)
-        .map(_._2)
-        .toArray
-      LMartDataset(featureValues, label, qid2)
+        var j = 0
+        while (j < group.values.length) {
+          featureValues(ind) = group.values(j)
+          ind += 1
+          j += 1
+        }
+        qid += 1
+      }
+      FlattenedDataset(featureValues, labels, qids)
     }
   }
 }
