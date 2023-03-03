@@ -99,7 +99,12 @@ class NDCGTest extends AnyFlatSpec with Matchers {
     val desc  = DatasetDescriptor((0 until 10).map(i => SingularFeature(s"f$i")).toList)
     val opts  = XGBoostOptions(treeMethod = "hist", randomSeed = 0)
     val booster =
-      XGBoostBooster.train(XGBoostBooster.formatData(dswrap(train, desc), None), None, opts, DatasetOptions(Nil, 10))
+      XGBoostBooster.train(
+        XGBoostBooster.formatData(dswrap(train, desc), None),
+        None,
+        opts,
+        DatasetOptions(Array.emptyIntArray, 10)
+      )
 
     for {
       _ <- 0 until 100
