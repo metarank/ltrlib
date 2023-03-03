@@ -10,7 +10,7 @@ case class LambdaMART[D, T <: Booster[D], O <: BoosterOptions](
     booster: BoosterFactory[D, T, O],
     train: D,
     test: Option[D],
-    categorical: List[Int],
+    categorical: Array[Int],
     dim: Int
 ) extends Ranker[T, O] {
 
@@ -35,12 +35,6 @@ object LambdaMART {
       case Feature.SingularFeature(name)     => List(name)
       case Feature.CategoryFeature(name)     => List(name)
       case Feature.VectorFeature(name, size) => (0 until size).map(i => s"${name}_$i")
-    }
-    val categorial = for {
-      cat    <- dataset.desc.features.collect { case c: Feature.CategoryFeature => c }
-      offset <- dataset.desc.offsets.get(cat)
-    } yield {
-      offset
     }
     val trainDs = LMartDataset(dataset)
     val train =
@@ -71,7 +65,7 @@ object LambdaMART {
         Some(trainDatasetNative)
       )
     }
-    new LambdaMART(booster, trainDatasetNative, testDatasetNative, categorial, dataset.desc.dim)
+    new LambdaMART(booster, trainDatasetNative, testDatasetNative, train.categoricalIndices, dataset.desc.dim)
   }
 
   case class LMartDataset(featureValues: Array[Double], labels: Array[Double], groups: Array[Int])
