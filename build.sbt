@@ -2,7 +2,7 @@ import Deps._
 
 name := "ltrlib"
 
-version := "0.2.0"
+version := "0.2.0-M4"
 
 scalaVersion := "2.13.10"
 
@@ -31,7 +31,8 @@ libraryDependencies ++= Seq(
   "com.opencsv"             % "opencsv"                 % "5.7.1",
   "org.scala-lang.modules" %% "scala-collection-compat" % "2.9.0",
   "io.github.metarank"      % "catboost4j"              % "1.1.1-1",
-  "ai.catboost"             % "catboost-prediction"     % "1.1.1"
+  "ai.catboost"             % "catboost-prediction"     % "1.1.1",
+  "it.unimi.dsi"            % "fastutil"                % "8.5.9"
 )
 
 sonatypeProfileName := "io.github.metarank"
