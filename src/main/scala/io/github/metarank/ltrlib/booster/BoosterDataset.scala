@@ -1,6 +1,6 @@
 package io.github.metarank.ltrlib.booster
 
-import io.github.metarank.ltrlib.model.Dataset
+import io.github.metarank.ltrlib.model.{Dataset, Feature}
 
 case class BoosterDataset(
     original: Dataset,
@@ -10,4 +10,8 @@ case class BoosterDataset(
     rows: Int,
     cols: Int,
     featureNames: Array[String]
-)
+) {
+  lazy val categories         = original.desc.features.collect { case c: Feature.CategoryFeature => c }
+  lazy val categoriesStrings  = categories.map(_.name).toArray
+  lazy val categoricalIndices = categories.flatMap(c => original.desc.offsets.get(c)).toArray
+}

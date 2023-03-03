@@ -39,7 +39,7 @@ trait Booster[D] extends Model {
 }
 
 object Booster {
-  case class DatasetOptions(categoryFeatures: List[Int], dims: Int)
+  case class DatasetOptions(categoryFeatures: Array[Int], dims: Int)
   trait BoosterOptions {
     def trees: Int
     def learningRate: Double
