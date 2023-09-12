@@ -4,9 +4,9 @@ name := "ltrlib"
 
 version := "0.2.2"
 
-scalaVersion := "2.13.10"
+scalaVersion := "2.13.12"
 
-crossScalaVersions := List("2.13.10", "2.12.17", "3.2.2")
+crossScalaVersions := List("2.13.12", "2.12.17", "3.2.2")
 
 organization := "io.github.metarank"
 
