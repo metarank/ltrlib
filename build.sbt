@@ -27,7 +27,7 @@ libraryDependencies ++= Seq(
   "org.apache.commons"      % "commons-math3"           % "3.6.1",
   "io.github.metarank"     %% "cfor"                    % "0.3",
   "io.github.metarank"      % "lightgbm4j"              % "3.3.2-5",
-  "io.github.metarank"      % "xgboost-java"            % "1.7.1-1",
+  "io.github.metarank"      % "xgboost-java"            % "2.0.2-1",
   "com.opencsv"             % "opencsv"                 % "5.7.1",
   "org.scala-lang.modules" %% "scala-collection-compat" % "2.9.0",
   "io.github.metarank"      % "catboost4j"              % "1.1.1-1",
