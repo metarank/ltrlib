@@ -7,6 +7,7 @@ case class BoosterDataset(
     data: Array[Double],
     labels: Array[Double],
     groups: Array[Int],
+    positions: Array[Int],
     rows: Int,
     cols: Int,
     featureNames: Array[String]

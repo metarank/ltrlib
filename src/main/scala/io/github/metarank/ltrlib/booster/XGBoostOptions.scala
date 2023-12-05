@@ -12,5 +12,6 @@ case class XGBoostOptions(
     randomSeed: Int = math.abs(Random.nextInt()),
     subsample: Double = 1.0,
     earlyStopping: Option[Int] = None,
-    treeMethod: String = "exact"
+    treeMethod: String = "exact",
+    debias: Boolean = false
 ) extends BoosterOptions

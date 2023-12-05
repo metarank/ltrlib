@@ -78,7 +78,7 @@ object XGBoostBooster extends BoosterFactory[DMatrix, XGBoostBooster, XGBoostOpt
     }
   }
 
-  override def formatData(d: BoosterDataset, parent: Option[DMatrix]): DMatrix = {
+  override def formatData(d: BoosterDataset, parent: Option[DMatrix], options: XGBoostOptions): DMatrix = {
     val mat = new DMatrix(d.data.map(_.toFloat), d.rows, d.cols, Float.NaN)
     mat.setLabel(d.labels.map(_.toFloat))
     mat.setGroup(d.groups)
@@ -99,15 +99,16 @@ object XGBoostBooster extends BoosterFactory[DMatrix, XGBoostBooster, XGBoostOpt
       dso: DatasetOptions
   ): XGBoostBooster = {
     val opts = Map[String, Object](
-      "objective"          -> "rank:pairwise",
-      "eval_metric"        -> s"ndcg@${options.ndcgCutoff}",
-      "num_round"          -> Integer.valueOf(options.trees),
-      "max_depth"          -> options.maxDepth.toString,
-      "eta"                -> options.learningRate.toString,
-      "seed"               -> options.randomSeed.toString,
-      "subsample"          -> options.subsample.toString,
-      "tree_method"        -> options.treeMethod,
-      "enable_categorical" -> (if (dso.categoryFeatures.isEmpty) "false" else "true")
+      "objective"           -> "rank:pairwise",
+      "eval_metric"         -> s"ndcg@${options.ndcgCutoff}",
+      "num_round"           -> Integer.valueOf(options.trees),
+      "max_depth"           -> options.maxDepth.toString,
+      "eta"                 -> options.learningRate.toString,
+      "seed"                -> options.randomSeed.toString,
+      "subsample"           -> options.subsample.toString,
+      "tree_method"         -> options.treeMethod,
+      "enable_categorical"  -> (if (dso.categoryFeatures.isEmpty) "false" else "true"),
+      "lambdarank_unbiased" -> (if (options.debias) "true" else "false")
     ).asJava
     val model: ml.dmlc.xgboost4j.java.Booster = XGBoost.train(dataset, opts, 0, Map.empty.asJava, null, null)
 

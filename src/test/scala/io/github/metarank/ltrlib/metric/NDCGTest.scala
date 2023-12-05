@@ -100,7 +100,7 @@ class NDCGTest extends AnyFlatSpec with Matchers {
     val opts  = XGBoostOptions(treeMethod = "hist", randomSeed = 0)
     val booster =
       XGBoostBooster.train(
-        XGBoostBooster.formatData(dswrap(train, desc), None),
+        XGBoostBooster.formatData(dswrap(train, desc), None, XGBoostOptions()),
         None,
         opts,
         DatasetOptions(Array.emptyIntArray, 10)
@@ -113,7 +113,7 @@ class NDCGTest extends AnyFlatSpec with Matchers {
       val q2    = makeQuery(2, 1 + Random.nextInt(20), 10)
       val q3    = makeQuery(3, 1 + Random.nextInt(20), 10)
       val ds    = dswrap(List(q1, q2, q3), desc)
-      val test  = XGBoostBooster.formatData(ds, None)
+      val test  = XGBoostBooster.formatData(ds, None, XGBoostOptions())
       val ndcg1 = XGBoostBooster.evalMetric(booster.model, test, i)
       XGBoostBooster.closeData(test)
       val ndcg2 = booster.eval(ds.original, NDCG(10, nolabels = 1.0))
@@ -140,6 +140,7 @@ class NDCGTest extends AnyFlatSpec with Matchers {
       trainDs.featureValues,
       trainDs.labels,
       trainDs.groups,
+      trainDs.positions,
       dataset.itemCount,
       dataset.desc.dim,
       featureNames.toArray

@@ -29,7 +29,8 @@ object LambdaMART {
   def apply[D, T <: Booster[D], O <: BoosterOptions](
       dataset: Dataset,
       booster: BoosterFactory[D, T, O],
-      testDatasetOption: Option[Dataset] = None
+      testDatasetOption: Option[Dataset] = None,
+      options: O
   ): LambdaMART[D, T, O] = {
     val featureNames = dataset.desc.features.flatMap {
       case Feature.SingularFeature(name)     => List(name)
@@ -43,11 +44,12 @@ object LambdaMART {
         trainDs.featureValues,
         trainDs.labels,
         trainDs.groups,
+        trainDs.positions,
         dataset.itemCount,
         dataset.desc.dim,
         featureNames.toArray
       )
-    val trainDatasetNative = booster.formatData(train, None)
+    val trainDatasetNative = booster.formatData(train, None, options)
     val testDatasetNative = for {
       testDataset <- testDatasetOption
       testDs = FlattenedDataset.apply(testDataset)
@@ -58,22 +60,30 @@ object LambdaMART {
           testDs.featureValues,
           testDs.labels,
           testDs.groups,
+          testDs.positions,
           testDataset.itemCount,
           testDataset.desc.dim,
           featureNames.toArray
         ),
-        Some(trainDatasetNative)
+        Some(trainDatasetNative),
+        options
       )
     }
     new LambdaMART(booster, trainDatasetNative, testDatasetNative, train.categoricalIndices, dataset.desc.dim)
   }
 
-  case class FlattenedDataset(featureValues: Array[Double], labels: Array[Double], groups: Array[Int])
+  case class FlattenedDataset(
+      featureValues: Array[Double],
+      labels: Array[Double],
+      groups: Array[Int],
+      positions: Array[Int]
+  )
   object FlattenedDataset {
     def apply(dataset: Dataset): FlattenedDataset = {
       val featureValues = new Array[Double](dataset.itemCount * dataset.desc.dim)
       val labels        = new Array[Double](dataset.itemCount)
       val qids          = new Array[Int](dataset.groups.size)
+      val positions     = new Array[Int](dataset.itemCount)
 
       var row = 0
       var qid = 0
@@ -86,6 +96,7 @@ object LambdaMART {
         var i = 0
         while (i < group.rows) {
           labels(row) = group.labels(i)
+          positions(row) = i
           row += 1
           i += 1
         }
@@ -97,7 +108,7 @@ object LambdaMART {
         }
         qid += 1
       }
-      FlattenedDataset(featureValues, labels, qids)
+      FlattenedDataset(featureValues, labels, qids, positions)
     }
   }
 }

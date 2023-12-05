@@ -27,11 +27,12 @@ case class LightGBMBooster(model: LGBMBooster) extends Booster[LGBMDataset] with
 }
 
 object LightGBMBooster extends BoosterFactory[LGBMDataset, LightGBMBooster, LightGBMOptions] with Logging {
-  override def formatData(d: BoosterDataset, parent: Option[LGBMDataset]): LGBMDataset = {
+  override def formatData(d: BoosterDataset, parent: Option[LGBMDataset], options: LightGBMOptions): LGBMDataset = {
     val ds = LGBMDataset.createFromMat(d.data, d.rows, d.cols, true, "", parent.orNull)
     ds.setField("label", d.labels.map(_.toFloat))
     ds.setField("group", d.groups)
     ds.setFeatureNames(d.featureNames)
+    if (options.debias) ds.setField("position", d.positions)
     ds
   }
   def apply(string: Array[Byte]): LightGBMBooster = {

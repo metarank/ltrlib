@@ -11,5 +11,6 @@ case class LightGBMOptions(
     randomSeed: Int = math.abs(Random.nextInt()),
     numLeaves: Int = 16,
     featureFraction: Double = 1.0,
-    earlyStopping: Option[Int] = None
+    earlyStopping: Option[Int] = None,
+    debias: Boolean = false
 ) extends BoosterOptions

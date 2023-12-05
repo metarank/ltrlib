@@ -18,47 +18,53 @@ import org.scalatest.matchers.should.Matchers
 
 class LambdaMARTTest extends AnyFlatSpec with Matchers {
   it should "train on letor: lightgbm" in {
+    val opts = LightGBMOptions(earlyStopping = Some(20))
     val lm = LambdaMART(
       LetorDataset.train,
       LightGBMBooster,
-      Some(LetorDataset.test)
+      Some(LetorDataset.test),
+      opts
     )
-    val booster = lm.fit(LightGBMOptions(earlyStopping = Some(20)))
+    val booster = lm.fit(opts)
     val err     = booster.eval(LetorDataset.test, NDCG(10))
     err should be > 0.40
     booster.model.getFeatureNames.length shouldBe 46
   }
 
   it should "train on letor: xgboost" in {
-    val lm =
-      LambdaMART(LetorDataset.train, XGBoostBooster, Some(LetorDataset.test))
-    val booster = lm.fit(XGBoostOptions(earlyStopping = Some(20)))
+    val opts    = XGBoostOptions(earlyStopping = Some(20))
+    val lm      = LambdaMART(LetorDataset.train, XGBoostBooster, Some(LetorDataset.test), opts)
+    val booster = lm.fit(opts)
     val err     = booster.eval(LetorDataset.test, NDCG(10))
     err should be > 0.40
   }
 
   it should "train on letor: catboost" in {
+    val opts = CatboostOptions(earlyStopping = Some(10))
     val lm = LambdaMART(
       LetorDataset.train,
       CatboostBooster,
-      Some(LetorDataset.test)
+      Some(LetorDataset.test),
+      opts
     )
-    val booster = lm.fit(CatboostOptions(earlyStopping = Some(10)))
+    val booster = lm.fit(opts)
     val err     = booster.eval(LetorDataset.test, NDCG(10))
     err should be > 0.40
   }
 
   it should "get weights: xgboost" in {
-    val lm      = LambdaMART(LetorDataset.train, XGBoostBooster, Some(LetorDataset.test))
-    val booster = lm.fit(XGBoostOptions(trees = 5))
+    val opts    = XGBoostOptions(trees = 5)
+    val lm      = LambdaMART(LetorDataset.train, XGBoostBooster, Some(LetorDataset.test), opts)
+    val booster = lm.fit(opts)
     val weights = booster.weights()
     weights.length shouldBe LetorDataset.train.desc.dim
     weights.count(_ > 0) should be > 0
   }
 
   it should "get weights: lgbm" in {
-    val lm      = LambdaMART(LetorDataset.train, LightGBMBooster, Some(LetorDataset.test))
-    val booster = lm.fit(LightGBMOptions(trees = 5))
+    val opts    = LightGBMOptions(trees = 5)
+    val lm      = LambdaMART(LetorDataset.train, LightGBMBooster, Some(LetorDataset.test), opts)
+    val booster = lm.fit(opts)
     val weights = booster.weights()
     weights.length shouldBe LetorDataset.train.desc.dim
     weights.count(_ > 0) should be > 0

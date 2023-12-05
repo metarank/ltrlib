@@ -48,7 +48,7 @@ object CatboostBooster extends BoosterFactory[String, CatboostBooster, CatboostO
     CatboostBooster(cb, string)
   }
 
-  override def formatData(ds: BoosterDataset, parent: Option[String]): String = {
+  override def formatData(ds: BoosterDataset, parent: Option[String], options: CatboostOptions): String = {
     val file   = File.newTemporaryFile("catboost-", ".svm")
     val stream = file.newFileOutputStream()
     LibSVMOutputFormat.write(stream, ds.original)

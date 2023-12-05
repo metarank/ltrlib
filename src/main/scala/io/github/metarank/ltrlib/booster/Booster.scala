@@ -51,7 +51,7 @@ object Booster {
 
   trait BoosterFactory[D, T <: Booster[D], O <: BoosterOptions] {
     def apply(string: Array[Byte]): T
-    def formatData(ds: BoosterDataset, parent: Option[D]): D
+    def formatData(ds: BoosterDataset, parent: Option[D], options: O): D
     def closeData(d: D): Unit = {}
     def train(dataset: D, test: Option[D], options: O, dso: DatasetOptions): T
   }
