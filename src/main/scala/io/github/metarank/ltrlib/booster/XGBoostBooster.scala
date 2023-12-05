@@ -117,7 +117,6 @@ object XGBoostBooster extends BoosterFactory[DMatrix, XGBoostBooster, XGBoostOpt
     var lastBest     = 0.0
     var lastBestIter = 0
     while ((it < options.trees) && !earlyStop) {
-      it += 1
       model.update(dataset, it)
       val ndcgTrain = evalMetric(model, dataset, it)
       test match {
@@ -141,6 +140,7 @@ object XGBoostBooster extends BoosterFactory[DMatrix, XGBoostBooster, XGBoostOpt
         case None =>
           logger.info(s"[$it] NDCG@train = $ndcgTrain")
       }
+      it += 1
     }
     val ftypes = (0 until dso.dims).map(x => if (dso.categoryFeatures.contains(x)) "c" else "q").toArray
     XGBoostBooster(model, ftypes)

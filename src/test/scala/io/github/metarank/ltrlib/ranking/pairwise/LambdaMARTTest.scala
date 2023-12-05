@@ -39,6 +39,14 @@ class LambdaMARTTest extends AnyFlatSpec with Matchers {
     err should be > 0.40
   }
 
+  it should "train on letor: xgboost debias" in {
+    val opts    = XGBoostOptions(earlyStopping = Some(20), debias = true)
+    val lm      = LambdaMART(LetorDataset.train, XGBoostBooster, Some(LetorDataset.test), opts)
+    val booster = lm.fit(opts)
+    val err     = booster.eval(LetorDataset.test, NDCG(10))
+    err should be > 0.40
+  }
+
   it should "train on letor: catboost" in {
     val opts = CatboostOptions(earlyStopping = Some(10))
     val lm = LambdaMART(
