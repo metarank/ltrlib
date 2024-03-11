@@ -16,7 +16,7 @@ case class XGBoostBooster(
 ) extends Booster[DMatrix]
     with Logging {
 
-  override def predictMat(values: Array[Double], rows: Int, cols: Int): Array[Double] = {
+  override def predictMat(values: Array[Double], rows: Int, cols: Int): Array[Double] = whenNotClosed {
     val mat = new DMatrix(values.map(_.toFloat), rows, cols, Float.NaN)
     mat.setGroup(Array(rows))
     mat.setFeatureTypes(featureTypes)
@@ -30,9 +30,9 @@ case class XGBoostBooster(
     out
   }
 
-  override def close(): Unit = model.dispose()
+  override def close(): Unit = whenNotClosed { model.dispose() }
 
-  override def save(): Array[Byte] = {
+  override def save(): Array[Byte] = whenNotClosed {
     val bytes = new ByteArrayOutputStream()
     val data  = new DataOutputStream(bytes)
     data.writeByte(BITSTREAM_VERSION)
@@ -47,7 +47,7 @@ case class XGBoostBooster(
     bytes.toByteArray
   }
 
-  override def weights(): Array[Double] = {
+  override def weights(): Array[Double] = whenNotClosed {
     val names   = (0 until model.getNumFeature.toInt).map(i => s"feature$i").toArray
     val weights = model.getFeatureScore(names).asScala
     val result = for {

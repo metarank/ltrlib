@@ -11,19 +11,24 @@ import scala.collection.mutable
 
 case class LightGBMBooster(model: LGBMBooster) extends Booster[LGBMDataset] with Logging {
 
-  override def predictMat(values: Array[Double], rows: Int, cols: Int): Array[Double] = {
+  override def predictMat(values: Array[Double], rows: Int, cols: Int): Array[Double] = whenNotClosed {
     model.predictForMat(values, rows, cols, true, PredictionType.C_API_PREDICT_NORMAL)
   }
 
-  override def close(): Unit = model.close()
+  override def close(): Unit = whenNotClosed {
+    isClosed = true
+    model.close()
+  }
 
-  override def save(): Array[Byte] =
+  override def save(): Array[Byte] = whenNotClosed {
     model.saveModelToString(0, 0, FeatureImportanceType.SPLIT).getBytes(StandardCharsets.UTF_8)
+  }
 
-  override def weights(): Array[Double] =
+  override def weights(): Array[Double] = whenNotClosed {
     // numIteration=0 means "use all of them"
     // we use split there to match xgboost, which can only do split
     model.featureImportance(0, FeatureImportanceType.SPLIT)
+  }
 }
 
 object LightGBMBooster extends BoosterFactory[LGBMDataset, LightGBMBooster, LightGBMOptions] with Logging {
