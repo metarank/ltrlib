@@ -31,7 +31,7 @@ libraryDependencies ++= Seq(
   "com.opencsv"             % "opencsv"                 % "5.9",
   "org.scala-lang.modules" %% "scala-collection-compat" % "2.11.0",
   "io.github.metarank"      % "catboost-train-java"     % "1.2.2-1",
-  "ai.catboost"             % "catboost-prediction"     % "1.2.2",
+  "ai.catboost"             % "catboost-prediction"     % "1.2.3",
   "it.unimi.dsi"            % "fastutil"                % "8.5.12"
 )
 
