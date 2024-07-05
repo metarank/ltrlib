@@ -6,7 +6,7 @@ version := "0.2.5"
 
 scalaVersion := "2.13.14"
 
-crossScalaVersions := List("2.13.14", "2.12.19", "3.3.3")
+crossScalaVersions := List("2.13.14", "2.12.19", "3.4.1")
 
 organization := "io.github.metarank"
 
@@ -26,12 +26,12 @@ libraryDependencies ++= Seq(
   "org.slf4j"               % "slf4j-simple"            % slf4jversion     % Test,
   "org.apache.commons"      % "commons-math3"           % "3.6.1",
   "io.github.metarank"     %% "cfor"                    % "0.3",
-  "io.github.metarank"      % "lightgbm4j"              % "4.1.0-2",
+  "io.github.metarank"      % "lightgbm4j"              % "4.4.0-1",
   "io.github.metarank"      % "xgboost-java"            % "2.0.2-1",
   "com.opencsv"             % "opencsv"                 % "5.9",
-  "org.scala-lang.modules" %% "scala-collection-compat" % "2.11.0",
+  "org.scala-lang.modules" %% "scala-collection-compat" % "2.12.0",
   "io.github.metarank"      % "catboost-train-java"     % "1.2.2-1",
-  "ai.catboost"             % "catboost-prediction"     % "1.2.3",
+  "ai.catboost"             % "catboost-prediction"     % "1.2.5",
   "it.unimi.dsi"            % "fastutil"                % "8.5.13"
 )
 
