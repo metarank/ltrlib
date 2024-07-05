@@ -16,7 +16,7 @@ case class LightGBMBooster(model: LGBMBooster) extends Booster[LGBMDataset] with
   }
 
   override def close(): Unit = whenNotClosed {
-    isClosed = true
+    nativeLibIsClosed = true
     model.close()
   }
 

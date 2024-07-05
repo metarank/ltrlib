@@ -5,13 +5,14 @@ import io.github.metarank.ltrlib.model.{Dataset, Model}
 import org.apache.commons.math3.linear.{Array2DRowRealMatrix, ArrayRealVector, RealMatrix, RealVector}
 
 trait Booster[D] extends Model {
-  protected var isClosed = false
+  protected var nativeLibIsClosed = false
   def save(): Array[Byte]
   def predictMat(values: Array[Double], rows: Int, cols: Int): Array[Double]
   def weights(): Array[Double]
   def close(): Unit
+  def isClosed(): Boolean = nativeLibIsClosed
 
-  def whenNotClosed[T](f: => T): T = if (!isClosed) f else throw new Exception("booster is already closed")
+  def whenNotClosed[T](f: => T): T = if (!nativeLibIsClosed) f else throw new Exception("booster is already closed")
 
   override def predict(values: RealMatrix): ArrayRealVector = {
     val rows = values.getRowDimension
