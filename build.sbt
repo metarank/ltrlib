@@ -32,7 +32,7 @@ libraryDependencies ++= Seq(
   "org.scala-lang.modules" %% "scala-collection-compat" % "2.12.0",
   "io.github.metarank"      % "catboost-train-java"     % "1.2.2-1",
   "ai.catboost"             % "catboost-prediction"     % "1.2.5",
-  "it.unimi.dsi"            % "fastutil"                % "8.5.13"
+  "it.unimi.dsi"            % "fastutil"                % "8.5.14"
 )
 
 sonatypeProfileName := "io.github.metarank"
