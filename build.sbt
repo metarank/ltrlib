@@ -28,7 +28,7 @@ libraryDependencies ++= Seq(
   "io.github.metarank"     %% "cfor"                    % "0.3",
   "io.github.metarank"      % "lightgbm4j"              % "4.4.0-1",
   "io.github.metarank"      % "xgboost-java"            % "2.0.2-1",
-  "com.opencsv"             % "opencsv"                 % "5.9",
+  "com.opencsv"             % "opencsv"                 % "5.10",
   "org.scala-lang.modules" %% "scala-collection-compat" % "2.12.0",
   "io.github.metarank"      % "catboost-train-java"     % "1.2.2-1",
   "ai.catboost"             % "catboost-prediction"     % "1.2.5",
