@@ -20,7 +20,7 @@ libraryDependencies ++= Seq(
   "org.scalatest"          %% "scalatest"               % scalatestVersion % Test,
   "org.scalatest"          %% "scalatest-propspec"      % scalatestVersion % Test,
   "org.scalactic"          %% "scalactic"               % scalatestVersion % Test,
-  "org.scalatestplus"      %% "scalacheck-1-16"         % "3.2.14.0"       % Test,
+  "org.scalatestplus"      %% "scalacheck-1-17"         % "3.2.18.0"       % Test,
   "com.github.pathikrit"   %% "better-files"            % "3.9.2",
   "org.slf4j"               % "slf4j-api"               % slf4jversion,
   "org.slf4j"               % "slf4j-simple"            % slf4jversion     % Test,
