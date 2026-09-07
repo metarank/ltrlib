@@ -20,7 +20,7 @@ human-friendly API. Currently, is under an active development.
 
 libLTR is published to maven-central for scala 3.x, so for SBT, add this snippet to `build.sbt`:
 ```scala
-libraryDependencies += "io.github.metarank" %% "ltrlib" % "0.2.6"
+libraryDependencies += "io.github.metarank" %% "ltrlib" % "0.3.0"
 ```
 
 For maven:
@@ -28,7 +28,7 @@ For maven:
 <dependency>
   <groupId>io.github.metarank</groupId>
   <artifactId>ltrlib_3</artifactId>
-  <version>0.2.6</version>
+  <version>0.3.0</version>
 </dependency>
 ```
 ## Usage
