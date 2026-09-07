@@ -14,6 +14,9 @@ Test / logBuffered := false
 
 Test / parallelExecution := false
 
+// lightgbm4j JNI lib can be loaded only once per JVM, so +test needs a fresh JVM per Scala version
+Test / fork := true
+
 scalacOptions ++= Seq("-feature", "-deprecation", "-release:17")
 
 javacOptions ++= Seq("--release", "17")
