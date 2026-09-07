@@ -24,7 +24,7 @@ class LambdaMARTMissingTest extends AnyFlatSpec with Matchers {
   }
 
   it should "train on letor: xgboost" in {
-    val opts = XGBoostOptions()
+    val opts    = XGBoostOptions()
     val lm      = LambdaMART(train, XGBoostBooster, Some(test), opts)
     val booster = lm.fit(opts)
     val err     = booster.eval(test, NDCG(10))

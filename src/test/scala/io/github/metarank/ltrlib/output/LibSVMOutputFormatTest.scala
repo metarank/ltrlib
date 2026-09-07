@@ -10,7 +10,7 @@ import scala.collection.immutable.List
 
 class LibSVMOutputFormatTest extends AnyFlatSpec with Matchers {
   val desc = DatasetDescriptor(List(SingularFeature("f1"), SingularFeature("f2")))
-  val ds = Dataset(
+  val ds   = Dataset(
     desc,
     List(
       Query(desc, List(LabeledItem(1, 1, Array(1.0, 2.0)), LabeledItem(0, 1, Array(0.0, 0.0)))),

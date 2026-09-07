@@ -38,7 +38,7 @@ object LambdaMART {
       case Feature.VectorFeature(name, size) => (0 until size).map(i => s"${name}_$i")
     }
     val trainDs = FlattenedDataset(dataset)
-    val train =
+    val train   =
       BoosterDataset(
         dataset,
         trainDs.featureValues,
@@ -50,7 +50,7 @@ object LambdaMART {
         featureNames.toArray
       )
     val trainDatasetNative = booster.formatData(train, None, options)
-    val testDatasetNative = for {
+    val testDatasetNative  = for {
       testDataset <- testDatasetOption
       testDs = FlattenedDataset.apply(testDataset)
     } yield {

@@ -19,7 +19,7 @@ import org.scalatest.matchers.should.Matchers
 class LambdaMARTTest extends AnyFlatSpec with Matchers {
   it should "train on letor: lightgbm" in {
     val opts = LightGBMOptions(earlyStopping = Some(20))
-    val lm = LambdaMART(
+    val lm   = LambdaMART(
       LetorDataset.train,
       LightGBMBooster,
       Some(LetorDataset.test),
@@ -49,7 +49,7 @@ class LambdaMARTTest extends AnyFlatSpec with Matchers {
 
   it should "train on letor: catboost" in {
     val opts = CatboostOptions(earlyStopping = Some(10))
-    val lm = LambdaMART(
+    val lm   = LambdaMART(
       LetorDataset.train,
       CatboostBooster,
       Some(LetorDataset.test),

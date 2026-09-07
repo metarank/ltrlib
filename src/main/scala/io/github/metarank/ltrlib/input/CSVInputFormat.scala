@@ -45,7 +45,7 @@ object CSVInputFormat extends InputFormat {
   ): Either[DatasetError, List[LabeledItem]] = for {
     labelCol <- header.get(labelColumn).toRight(DatasetError(s"label column $labelColumn not found in header"))
     groupCol <- header.get(groupColumn).toRight(DatasetError(s"group column $groupColumn not found in header"))
-    rows <- Try(reader.iterator().asScala.toList) match {
+    rows     <- Try(reader.iterator().asScala.toList) match {
       case Failure(exception) => Left(DatasetError(s"error parsing: $exception"))
       case Success(value)     => Right(value)
     }
