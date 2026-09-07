@@ -11,7 +11,7 @@ import java.io.ByteArrayInputStream
 case class CatboostBooster(booster: CatBoostModel, bytes: Array[Byte]) extends Booster[String] {
   override def save(): Array[Byte] = bytes
 
-  override def close(): Unit = whenNotClosed { booster.close() }
+  override protected def releaseUnsafe(): Unit = booster.close()
 
   override def weights(): Array[Double] = Array.emptyDoubleArray
 
