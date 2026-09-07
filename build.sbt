@@ -4,9 +4,7 @@ name := "ltrlib"
 
 version := "0.2.6"
 
-scalaVersion := "2.13.18"
-
-crossScalaVersions := List("2.13.18", "3.9.0")
+scalaVersion := "3.9.0"
 
 organization := "io.github.metarank"
 
@@ -14,7 +12,7 @@ Test / logBuffered := false
 
 Test / parallelExecution := false
 
-// lightgbm4j JNI lib can be loaded only once per JVM, so +test needs a fresh JVM per Scala version
+// lightgbm4j JNI lib can be loaded only once per JVM, so tests run in a fresh forked JVM
 Test / fork := true
 
 scalacOptions ++= Seq("-feature", "-deprecation", "-release:17")
@@ -23,9 +21,7 @@ javacOptions ++= Seq("--release", "17")
 
 libraryDependencies ++= Seq(
   "org.scalatest"        %% "scalatest"           % scalatestVersion % Test,
-  "org.scalatest"        %% "scalatest-propspec"  % scalatestVersion % Test,
   "org.scalactic"        %% "scalactic"           % scalatestVersion % Test,
-  "org.scalatestplus"    %% "scalacheck-1-19"     % "3.2.20.0"       % Test,
   "com.github.pathikrit" %% "better-files"        % "3.9.2",
   "org.slf4j"             % "slf4j-api"           % slf4jversion,
   "org.slf4j"             % "slf4j-simple"        % slf4jversion     % Test,
@@ -41,7 +37,7 @@ libraryDependencies ++= Seq(
 
 publishMavenStyle := true
 
-// sbt 2 built-in Sonatype Central Portal publishing: `+publishSigned` stages into target/sona-staging,
+// sbt 2 built-in Sonatype Central Portal publishing: `publishSigned` stages into target/sona-staging,
 // then `sonaRelease` uploads and releases. Credentials via SONATYPE_USERNAME / SONATYPE_PASSWORD
 // (Central Portal user token) or a Credentials entry for host central.sonatype.com.
 publishTo := {

@@ -33,7 +33,7 @@ class QueryTest extends AnyFlatSpec with Matchers {
         )
       )
     )
-    result shouldBe a[Failure[_]]
+    result shouldBe a[Failure[?]]
   }
 
 }

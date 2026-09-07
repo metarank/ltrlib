@@ -29,6 +29,6 @@ class DatasetDescriptorTest extends AnyFlatSpec with Matchers {
       SingularFeature("one"),
       VectorFeature("one", 10)
     )
-    Try(DatasetDescriptor(features)) shouldBe a[Failure[_]]
+    Try(DatasetDescriptor(features)) shouldBe a[Failure[?]]
   }
 }

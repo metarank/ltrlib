@@ -18,17 +18,17 @@ human-friendly API. Currently, is under an active development.
 
 ## Installation
 
-libLTR is published to maven-central for scala 3.x and 2.13, so for SBT, add this snippet to `build.sbt`:
+libLTR is published to maven-central for scala 3.x, so for SBT, add this snippet to `build.sbt`:
 ```scala
-libraryDependencies += "io.github.metarank" %% "ltrlib" % "0.2.2"
+libraryDependencies += "io.github.metarank" %% "ltrlib" % "0.2.6"
 ```
 
 For maven:
 ```xml
 <dependency>
   <groupId>io.github.metarank</groupId>
-  <artifactId>ltrlib_2.13</artifactId>
-  <version>0.2.2</version>
+  <artifactId>ltrlib_3</artifactId>
+  <version>0.2.6</version>
 </dependency>
 ```
 ## Usage

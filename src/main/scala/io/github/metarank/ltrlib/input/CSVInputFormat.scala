@@ -5,7 +5,7 @@ import io.github.metarank.ltrlib.input.InputFormat.DatasetError
 import io.github.metarank.ltrlib.model.Feature.SingularFeature
 import io.github.metarank.ltrlib.model.{DatasetDescriptor, LabeledItem, Query}
 
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 import java.io.{InputStream, InputStreamReader}
 import scala.util.{Failure, Success, Try}
 

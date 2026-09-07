@@ -39,4 +39,4 @@ jobs:
       uses: sbt/setup-sbt@v1
 
     - name: Run tests
-      run: sbt -mem 3000 +test
+      run: sbt -mem 3000 test

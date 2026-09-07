@@ -12,7 +12,7 @@ class CSVInputFormatTest extends AnyFlatSpec with Matchers {
       """group,label,f1,f2
         |1,1,0,0
         |1,0,0,0""".stripMargin
-    val result = CSVInputFormat.load("group", "label", new ByteArrayInputStream(data.getBytes)).right.get
+    val result = CSVInputFormat.load("group", "label", new ByteArrayInputStream(data.getBytes)).toOption.get
     result.desc.features shouldBe List(SingularFeature("f1"), SingularFeature("f2"))
     result.queries.size shouldBe 1
   }
