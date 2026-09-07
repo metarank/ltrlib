@@ -1,8 +1,19 @@
 import Deps._
 
-name := "ltrlib"
+ThisBuild / dynverVTagPrefix := false
+ThisBuild / versionScheme    := Some("early-semver")
 
-version := "0.2.6"
+ThisBuild / credentials ++= (for {
+  user <- sys.env.get("SONATYPE_USERNAME")
+  pass <- sys.env.get("SONATYPE_PASSWORD")
+} yield Credentials("Sonatype Central Portal", "central.sonatype.com", user, pass)).toList
+
+lazy val assertTagVersion = taskKey[Unit]("assert that version is derived from an exact git tag")
+assertTagVersion := {
+  if (isSnapshot.value) sys.error(s"version ${version.value} is not an exact git tag version")
+}
+
+name := "ltrlib"
 
 scalaVersion := "3.9.0"
 
