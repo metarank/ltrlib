@@ -3,10 +3,10 @@ package io.github.metarank.ltrlib.model
 import io.github.metarank.cfor._
 import org.apache.commons.math3.linear.{ArrayRealVector, RealVector}
 case class Query(group: Int, labels: Array[Double], values: Array[Double]) {
-  val memUsed                      = labels.length * 8 + values.length * 8
-  val rows                         = labels.length
-  val columns                      = values.length / labels.length
-  def getValue(row: Int, col: Int) = values(columns * row + col)
+  val memUsed                         = labels.length * 8 + values.length * 8
+  val rows                            = labels.length
+  val columns                         = values.length / labels.length
+  def getValue(row: Int, col: Int)    = values(columns * row + col)
   def getRow(row: Int): Array[Double] = {
     val result = new Array[Double](columns)
     cfor(0 until columns) { col => result(col) = values(row * columns + col) }

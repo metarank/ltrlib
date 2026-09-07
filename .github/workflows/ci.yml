@@ -12,7 +12,7 @@ jobs:
     runs-on: ${{ matrix.platform }}
     strategy:
       matrix:
-        java: [11, 17, 21]
+        java: [17, 21, 25]
         platform: [ubuntu-24.04]
 
     steps:
@@ -39,4 +39,4 @@ jobs:
       uses: sbt/setup-sbt@v1
 
     - name: Run tests
-      run: sbt test
+      run: sbt -mem 3000 +test

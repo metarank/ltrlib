@@ -4,7 +4,7 @@ import io.github.metarank.ltrlib.model.Feature.SingularFeature
 import io.github.metarank.ltrlib.model.{Dataset, DatasetDescriptor, LabeledItem, Query}
 
 object SmallDiabetesDataset {
-  val desc = DatasetDescriptor(List(SingularFeature("one"), SingularFeature("two")))
+  val desc    = DatasetDescriptor(List(SingularFeature("one"), SingularFeature("two")))
   def apply() = Dataset(
     desc,
     List(

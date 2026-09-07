@@ -16,7 +16,7 @@ class LogRegRankerTest extends AnyFlatSpec with Matchers {
     val model = LogRegRanker(LetorDataset.train).fit(BatchSGD(30, 20, 0.3))
     model.weights.nonEmpty shouldBe true
     val errTest = model.eval(LetorDataset.test, NDCG(100))
-    val errRand = RandomRanker().fit().eval(LetorDataset.test, NDCG(100))
+    val errRand = RandomRanker().fit(()).eval(LetorDataset.test, NDCG(100))
     errTest should be > errRand
   }
 
@@ -43,7 +43,7 @@ class LogRegRankerTest extends AnyFlatSpec with Matchers {
   }
 
   it should "not fail on correlated features" in {
-    val desc = DatasetDescriptor(List(SingularFeature("one"), SingularFeature("two")))
+    val desc    = DatasetDescriptor(List(SingularFeature("one"), SingularFeature("two")))
     val dataset = Dataset(
       desc,
       List(

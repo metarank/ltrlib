@@ -95,9 +95,9 @@ class NDCGTest extends AnyFlatSpec with Matchers {
   }
 
   it should "fuzzer: match xgboost implementation" in {
-    val train = (0 until 1000).map(i => makeQuery(i, 2 + Random.nextInt(20), 10)).toList
-    val desc  = DatasetDescriptor((0 until 10).map(i => SingularFeature(s"f$i")).toList)
-    val opts  = XGBoostOptions(treeMethod = "hist", randomSeed = 0)
+    val train   = (0 until 1000).map(i => makeQuery(i, 2 + Random.nextInt(20), 10)).toList
+    val desc    = DatasetDescriptor((0 until 10).map(i => SingularFeature(s"f$i")).toList)
+    val opts    = XGBoostOptions(treeMethod = "hist", randomSeed = 0)
     val booster =
       XGBoostBooster.train(
         XGBoostBooster.formatData(dswrap(train, desc), None, XGBoostOptions()),
@@ -128,8 +128,8 @@ class NDCGTest extends AnyFlatSpec with Matchers {
   )
 
   def dswrap(q: List[Query], desc: DatasetDescriptor) = {
-    val dataset = Dataset(desc, q)
-    val trainDs = FlattenedDataset(dataset)
+    val dataset      = Dataset(desc, q)
+    val trainDs      = FlattenedDataset(dataset)
     val featureNames = dataset.desc.features.flatMap {
       case Feature.SingularFeature(name)     => List(name)
       case Feature.CategoryFeature(name)     => List(name)

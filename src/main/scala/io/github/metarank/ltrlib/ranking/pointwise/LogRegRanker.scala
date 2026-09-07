@@ -145,7 +145,7 @@ object LogRegRanker {
   case class SingularFeatureWeight(feature: SingularFeature, weight: Double)     extends FeatureWeight
   case class CategoryFeatureWeight(feature: CategoryFeature, weight: Double)     extends FeatureWeight
   case class VectorFeatureWeight(feature: VectorFeature, weights: Array[Double]) extends FeatureWeight
-  case class LogRegModel(weights: List[FeatureWeight], intercept: Double) extends Model {
+  case class LogRegModel(weights: List[FeatureWeight], intercept: Double)        extends Model {
     val weightsVector = new ArrayRealVector(weights.flatMap {
       case SingularFeatureWeight(_, weight) => List(weight)
       case CategoryFeatureWeight(_, weight) => List(weight)
@@ -153,7 +153,7 @@ object LogRegRanker {
     }.toArray)
 
     override def eval(data: Dataset, metric: Metric): Double = {
-      val y = data.groups.map(_.labels)
+      val y    = data.groups.map(_.labels)
       val yhat = for {
         group <- data.groups
       } yield {

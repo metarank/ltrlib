@@ -50,7 +50,7 @@ case class XGBoostBooster(
   override def weights(): Array[Double] = whenNotClosed {
     val names   = (0 until model.getNumFeature.toInt).map(i => s"feature$i").toArray
     val weights = model.getFeatureScore(names).asScala
-    val result = for {
+    val result  = for {
       name <- names
     } yield {
       weights.get(name).map(_.doubleValue()).getOrElse(0.0)
