@@ -4,15 +4,43 @@ import io.github.metarank.ltrlib.metric.Metric
 import io.github.metarank.ltrlib.model.{Dataset, Model}
 import org.apache.commons.math3.linear.{Array2DRowRealMatrix, ArrayRealVector, RealMatrix, RealVector}
 
+import java.util.concurrent.atomic.{AtomicBoolean, AtomicInteger}
+
 trait Booster[D] extends Model {
-  protected var nativeLibIsClosed = false
+  private val inFlight       = new AtomicInteger(0)
+  private val closeRequested = new AtomicBoolean(false)
+  private val released       = new AtomicBoolean(false)
+
   def save(): Array[Byte]
   def predictMat(values: Array[Double], rows: Int, cols: Int): Array[Double]
   def weights(): Array[Double]
-  def close(): Unit
-  def isClosed(): Boolean = nativeLibIsClosed
 
-  def whenNotClosed[T](f: => T): T = if (!nativeLibIsClosed) f else throw new Exception("booster is already closed")
+  /** Frees the underlying native handle. Invoked exactly once, and only when no `whenNotClosed` block is running, so
+    * implementations never race with an in-flight predict/save/weights call.
+    */
+  protected def releaseUnsafe(): Unit
+
+  /** Requests the booster to be closed. Never blocks: if a `whenNotClosed` block is in flight on another thread, the
+    * native release is deferred until the last such block exits. After this call, new `whenNotClosed` blocks fail.
+    */
+  final def close(): Unit = {
+    closeRequested.set(true)
+    if (inFlight.get() == 0) tryRelease()
+  }
+
+  final def isClosed(): Boolean = closeRequested.get()
+
+  final def whenNotClosed[T](f: => T): T = {
+    inFlight.incrementAndGet()
+    try {
+      if (closeRequested.get()) throw new IllegalStateException("booster is already closed")
+      f
+    } finally {
+      if (inFlight.decrementAndGet() == 0 && closeRequested.get()) tryRelease()
+    }
+  }
+
+  private def tryRelease(): Unit = if (released.compareAndSet(false, true)) releaseUnsafe()
 
   override def predict(values: RealMatrix): ArrayRealVector = {
     val rows = values.getRowDimension

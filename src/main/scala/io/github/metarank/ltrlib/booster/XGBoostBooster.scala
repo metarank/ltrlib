@@ -30,7 +30,7 @@ case class XGBoostBooster(
     out
   }
 
-  override def close(): Unit = whenNotClosed { model.dispose() }
+  override protected def releaseUnsafe(): Unit = model.dispose()
 
   override def save(): Array[Byte] = whenNotClosed {
     val bytes = new ByteArrayOutputStream()

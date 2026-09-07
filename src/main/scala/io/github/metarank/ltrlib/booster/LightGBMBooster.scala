@@ -15,10 +15,7 @@ case class LightGBMBooster(model: LGBMBooster) extends Booster[LGBMDataset] with
     model.predictForMat(values, rows, cols, true, PredictionType.C_API_PREDICT_NORMAL)
   }
 
-  override def close(): Unit = whenNotClosed {
-    nativeLibIsClosed = true
-    model.close()
-  }
+  override protected def releaseUnsafe(): Unit = model.close()
 
   override def save(): Array[Byte] = whenNotClosed {
     model.saveModelToString(0, 0, FeatureImportanceType.SPLIT).getBytes(StandardCharsets.UTF_8)
