@@ -38,7 +38,7 @@ libraryDependencies ++= Seq(
   "org.slf4j"             % "slf4j-simple"        % slf4jversion     % Test,
   "org.apache.commons"    % "commons-math3"       % "3.6.1",
   "io.github.metarank"   %% "cfor"                % "0.4",
-  "io.github.metarank"    % "lightgbm4j"          % "4.6.0-2",
+  "io.github.metarank"    % "lightgbm4j"          % "4.6.0-3",
   "io.github.metarank"    % "xgboost-java"        % "2.0.2-1",
   "com.opencsv"           % "opencsv"             % "5.12.0",
   "io.github.metarank"    % "catboost-train-java" % "1.2.2-1",
