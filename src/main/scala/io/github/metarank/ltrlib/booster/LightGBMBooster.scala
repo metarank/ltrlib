@@ -92,7 +92,15 @@ object LightGBMBooster extends BoosterFactory[LGBMDataset, LightGBMBooster, Ligh
           logger.info(s"[$it] NDCG@train = $ndcgTrain")
       }
     }
-    LightGBMBooster(model)
+    if (lastBestIter > 0 && lastBestIter < it) {
+      // Saving only the first lastBestIter trees is the only way to truncate a LightGBM model
+      val truncated = model.saveModelToString(0, lastBestIter, FeatureImportanceType.SPLIT)
+      model.close()
+      logger.info(s"keeping the model as of iteration $lastBestIter of $it")
+      LightGBMBooster(LGBMBooster.loadModelFromString(truncated))
+    } else {
+      LightGBMBooster(model)
+    }
   }
 
 }

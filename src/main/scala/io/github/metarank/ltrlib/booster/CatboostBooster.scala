@@ -78,7 +78,7 @@ object CatboostBooster extends BoosterFactory[String, CatboostBooster, CatboostO
       "--random-seed"   -> options.randomSeed.toString
     ).flatMap(kv => List(kv._1, kv._2))
     val testOpts = test match {
-      case Some(value) => List("--test-set", value)
+      case Some(value) => List("--test-set", value, "--use-best-model", "true")
       case None        => Nil
     }
     val earlyStopOpts = options.earlyStopping match {
