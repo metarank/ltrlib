@@ -116,6 +116,7 @@ object XGBoostBooster extends BoosterFactory[DMatrix, XGBoostBooster, XGBoostOpt
     var earlyStop    = false
     var lastBest     = 0.0
     var lastBestIter = 0
+    var bestModel    = Option.empty[Array[Byte]]
     while ((it < options.trees) && !earlyStop) {
       model.update(dataset, it)
       val ndcgTrain = evalMetric(model, dataset, it)
@@ -130,6 +131,8 @@ object XGBoostBooster extends BoosterFactory[DMatrix, XGBoostBooster, XGBoostOpt
               if (ndcgTest > lastBest) {
                 lastBest = ndcgTest
                 lastBestIter = it
+                // This XGBoost build cannot slice a booster, so the best one is kept as a serialised copy
+                bestModel = Some(model.toByteArray())
               }
               if ((it - lastBestIter) > esThreshold) {
                 logger.info(s"early stop: $esThreshold rounds passed, best=$lastBest last=$ndcgTest")
@@ -143,7 +146,13 @@ object XGBoostBooster extends BoosterFactory[DMatrix, XGBoostBooster, XGBoostOpt
       it += 1
     }
     val ftypes = (0 until dso.dims).map(x => if (dso.categoryFeatures.contains(x)) "c" else "q").toArray
-    XGBoostBooster(model, ftypes)
+    if (bestModel.isDefined && lastBestIter < it - 1) {
+      model.dispose()
+      logger.info(s"keeping the model as of iteration ${lastBestIter + 1} of $it")
+      XGBoostBooster(XGBoost.loadModel(new ByteArrayInputStream(bestModel.get)), ftypes)
+    } else {
+      XGBoostBooster(model, ftypes)
+    }
   }
 
   override def closeData(d: DMatrix): Unit = d.dispose()
