@@ -131,8 +131,8 @@ object XGBoostBooster extends BoosterFactory[DMatrix, XGBoostBooster, XGBoostOpt
               if (ndcgTest > lastBest) {
                 lastBest = ndcgTest
                 lastBestIter = it
-                // This XGBoost build cannot slice a booster, so the best one is kept as a serialised copy
-                bestModel = Some(model.toByteArray())
+                // This XGBoost build cannot slice a booster, so the best one is kept as a UBJ copy, which holds categorical splits
+                bestModel = Some(model.toByteArray("ubj"))
               }
               if ((it - lastBestIter) > esThreshold) {
                 logger.info(s"early stop: $esThreshold rounds passed, best=$lastBest last=$ndcgTest")
