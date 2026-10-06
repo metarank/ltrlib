@@ -41,4 +41,15 @@ class CategoryFeatureTest extends AnyFlatSpec with Matchers {
     val importance = booster.weights()
     importance.length shouldBe 2
   }
+
+  it should "keep xgboost weights with cat splits after save-load" in {
+    val opts    = XGBoostOptions(trees = 10)
+    val lm      = LambdaMART(dataset, XGBoostBooster, None, opts)
+    val booster = lm.fit(opts)
+    val weights = booster.weights()
+    weights.length shouldBe 2
+    weights(1) should be > 0.0
+    val recovered = XGBoostBooster(booster.save())
+    recovered.weights() shouldBe weights
+  }
 }
