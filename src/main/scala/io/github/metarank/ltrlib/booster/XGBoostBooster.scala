@@ -1,10 +1,9 @@
 package io.github.metarank.ltrlib.booster
 
 import Booster.{BoosterFactory, BoosterOptions, DatasetOptions}
-import io.github.metarank.lightgbm4j.LGBMDataset
 import io.github.metarank.ltrlib.booster.XGBoostBooster.BITSTREAM_VERSION
 import io.github.metarank.ltrlib.util.Logging
-import ml.dmlc.xgboost4j.java.{DMatrix, IObjective, XGBoost}
+import ml.dmlc.xgboost4j.java.{DMatrix, XGBoost}
 
 import java.io.{ByteArrayInputStream, ByteArrayOutputStream, DataInputStream, DataOutputStream}
 import java.util.Base64
@@ -18,16 +17,20 @@ case class XGBoostBooster(
 
   override def predictMat(values: Array[Double], rows: Int, cols: Int): Array[Double] = whenNotClosed {
     val mat = new DMatrix(values.map(_.toFloat), rows, cols, Float.NaN)
-    mat.setGroup(Array(rows))
-    mat.setFeatureTypes(featureTypes)
-    val result = model.predict(mat)
-    val out    = new Array[Double](rows)
-    var i      = 0
-    while (i < rows) {
-      out(i) = result(i)(0)
-      i += 1
+    try {
+      mat.setGroup(Array(rows))
+      mat.setFeatureTypes(featureTypes)
+      val result = model.predict(mat)
+      val out    = new Array[Double](rows)
+      var i      = 0
+      while (i < rows) {
+        out(i) = result(i)(0)
+        i += 1
+      }
+      out
+    } finally {
+      mat.dispose()
     }
-    out
   }
 
   override protected def releaseUnsafe(): Unit = model.dispose()
@@ -48,12 +51,13 @@ case class XGBoostBooster(
   }
 
   override def weights(): Array[Double] = whenNotClosed {
-    val names   = (0 until model.getNumFeature.toInt).map(i => s"feature$i").toArray
-    val weights = model.getFeatureScore(names).asScala
-    val result  = for {
-      name <- names
-    } yield {
-      weights.get(name).map(_.doubleValue()).getOrElse(0.0)
+    // Booster.getFeatureScore fails on trees with categorical splits, so splits are counted from the raw dump
+    val result = new Array[Double](model.getNumFeature.toInt)
+    for {
+      tree  <- model.getModelDump("", false)
+      split <- XGBoostBooster.SPLIT_PATTERN.findAllMatchIn(tree)
+    } {
+      result(split.group(1).toInt) += 1.0
     }
     result
   }
@@ -61,6 +65,8 @@ case class XGBoostBooster(
 
 object XGBoostBooster extends BoosterFactory[DMatrix, XGBoostBooster, XGBoostOptions] with Logging {
   val BITSTREAM_VERSION = 2
+  // split node in a text dump: [f1<0.5] for numerical, [f1:{0,2}] for categorical, [f1] for indicator features
+  val SPLIT_PATTERN = """\[f(\d+)[<:\]]""".r
 
   override def apply(string: Array[Byte]): XGBoostBooster = {
     val stream  = new DataInputStream(new ByteArrayInputStream(string))

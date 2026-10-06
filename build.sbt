@@ -39,7 +39,11 @@ libraryDependencies ++= Seq(
   "org.apache.commons"    % "commons-math3"       % "3.6.1",
   "io.github.metarank"   %% "cfor"                % "0.4",
   "io.github.metarank"    % "lightgbm4j"          % "4.7.0-1",
-  "io.github.metarank"    % "xgboost-java"        % "2.0.2-1",
+  // upstream has no scala 3 build, and only the java API is used, so the scala 2.13 only deps are dropped
+  ("ml.dmlc" % "xgboost4j_2.13" % "3.4.0")
+    .exclude("org.scala-lang", "scala-compiler")
+    .exclude("org.scala-lang", "scala-reflect")
+    .exclude("org.scala-lang.modules", "scala-collection-compat_2.13"),
   "com.opencsv"           % "opencsv"             % "5.12.0",
   "io.github.metarank"    % "catboost-train-java" % "1.2.2-1",
   "ai.catboost"           % "catboost-prediction" % "1.2.10",
