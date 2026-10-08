@@ -31,23 +31,23 @@ scalacOptions ++= Seq("-feature", "-deprecation", "-release:17")
 javacOptions ++= Seq("--release", "17")
 
 libraryDependencies ++= Seq(
-  "org.scalatest"        %% "scalatest"           % scalatestVersion % Test,
-  "org.scalactic"        %% "scalactic"           % scalatestVersion % Test,
-  "com.github.pathikrit" %% "better-files"        % "3.9.2",
-  "org.slf4j"             % "slf4j-api"           % slf4jversion,
-  "org.slf4j"             % "slf4j-simple"        % slf4jversion     % Test,
-  "org.apache.commons"    % "commons-math3"       % "3.6.1",
-  "io.github.metarank"   %% "cfor"                % "0.4",
-  "io.github.metarank"    % "lightgbm4j"          % "4.7.0-1",
+  "org.scalatest"        %% "scalatest"     % scalatestVersion % Test,
+  "org.scalactic"        %% "scalactic"     % scalatestVersion % Test,
+  "com.github.pathikrit" %% "better-files"  % "3.9.2",
+  "org.slf4j"             % "slf4j-api"     % slf4jversion,
+  "org.slf4j"             % "slf4j-simple"  % slf4jversion     % Test,
+  "org.apache.commons"    % "commons-math3" % "3.6.1",
+  "io.github.metarank"   %% "cfor"          % "0.4",
+  "io.github.metarank"    % "lightgbm4j"    % "4.7.0-2",
   // upstream has no scala 3 build, and only the java API is used, so the scala 2.13 only deps are dropped
   ("ml.dmlc" % "xgboost4j_2.13" % "3.4.0")
     .exclude("org.scala-lang", "scala-compiler")
     .exclude("org.scala-lang", "scala-reflect")
     .exclude("org.scala-lang.modules", "scala-collection-compat_2.13"),
-  "com.opencsv"           % "opencsv"             % "5.12.0",
-  "io.github.metarank"    % "catboost-train-java" % "1.2.2-1",
-  "ai.catboost"           % "catboost-prediction" % "1.2.10",
-  "it.unimi.dsi"          % "fastutil"            % "8.5.19"
+  "com.opencsv"        % "opencsv"             % "5.12.0",
+  "io.github.metarank" % "catboost-train-java" % "1.2.2-1",
+  "ai.catboost"        % "catboost-prediction" % "1.2.10",
+  "it.unimi.dsi"       % "fastutil"            % "8.5.19"
 )
 
 publishMavenStyle := true
