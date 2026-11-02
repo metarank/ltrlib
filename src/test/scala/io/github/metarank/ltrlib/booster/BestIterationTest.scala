@@ -57,6 +57,25 @@ class BestIterationTest extends AnyFlatSpec with Matchers {
       booster.model.getModelDump(null: String, false).length
   }
 
+  // Returns the number of trees after which training stops, or None if it never does
+  def stopsAfter(scores: Seq[Double], patience: Int = 20): Option[Int] = {
+    val stopping = new Booster.EarlyStopping(patience)
+    scores.zipWithIndex.collectFirst { case (score, i) if stopping.shouldStop(i + 1, score) => i + 1 }
+  }
+
+  "Early stopping" should "stop once patience trees pass without a new best" in {
+    stopsAfter((1 to 50).map(_.toDouble) ++ Seq.fill(50)(0.0)) shouldBe Some(70)
+  }
+
+  it should "ignore a peak within the first patience trees" in {
+    stopsAfter(Seq(1.0) ++ Seq.fill(99)(0.0)) shouldBe Some(40)
+  }
+
+  it should "keep training while the score recovers from an early dip" in {
+    val dip = Seq(1.0) ++ Seq.fill(29)(0.0)
+    stopsAfter(dip ++ (1 to 30).map(_ * 0.01) ++ Seq.fill(40)(0.0)) shouldBe Some(80)
+  }
+
   // CatBoost picks its best iteration by its own loss: here iteration 86, before early stopping fires
   "CatBoost" should "keep only the trees up to the best test iteration" in {
     val opts    = CatboostOptions(trees = 100, randomSeed = 0, earlyStopping = Some(20), loggingLevel = "Silent")

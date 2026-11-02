@@ -81,6 +81,28 @@ object Booster {
     def earlyStopping: Option[Int]
   }
 
+  /** Decides when early stopping ends training, counted in trees built. The first `patience` trees often score high and
+    * then dip for a while before improving on it, so only scores from tree `patience` on count here: training stops
+    * once `patience` more trees pass without a new best among those. Which iteration is kept is decided separately,
+    * over all trees.
+    */
+  class EarlyStopping(val patience: Int) {
+    var best: Double   = Double.NegativeInfinity
+    var bestTrees: Int = 0
+
+    def shouldStop(trees: Int, score: Double): Boolean = {
+      if (trees >= patience && score > best) {
+        best = score
+        bestTrees = trees
+      }
+      trees >= patience && trees - bestTrees >= patience
+    }
+
+    def describe(trees: Int, score: Double): String =
+      s"early stop after $trees trees: test NDCG has not improved for ${trees - bestTrees} trees since tree $bestTrees " +
+        s"(earlyStopping=$patience); best since tree $patience=$best, last=$score"
+  }
+
   trait BoosterFactory[D, T <: Booster[D], O <: BoosterOptions] {
     def apply(string: Array[Byte]): T
     def formatData(ds: BoosterDataset, parent: Option[D], options: O): D

@@ -116,6 +116,7 @@ object XGBoostBooster extends BoosterFactory[DMatrix, XGBoostBooster, XGBoostOpt
     var earlyStop    = false
     var lastBest     = 0.0
     var lastBestIter = 0
+    val stopping     = options.earlyStopping.map(new Booster.EarlyStopping(_))
     var bestModel    = Option.empty[Array[Byte]]
     while ((it < options.trees) && !earlyStop) {
       model.update(dataset, it)
@@ -124,24 +125,25 @@ object XGBoostBooster extends BoosterFactory[DMatrix, XGBoostBooster, XGBoostOpt
         case Some(value) =>
           val ndcgTest = evalMetric(model, value, it)
           logger.info(
-            s"[$it] NDCG@${options.ndcgCutoff}:train = $ndcgTrain NDCG@${options.ndcgCutoff}:test = $ndcgTest"
+            s"[${it + 1}] NDCG@${options.ndcgCutoff}:train = $ndcgTrain NDCG@${options.ndcgCutoff}:test = $ndcgTest"
           )
           options.earlyStopping match {
-            case Some(esThreshold) =>
+            case Some(_) =>
               if (ndcgTest > lastBest) {
                 lastBest = ndcgTest
                 lastBestIter = it
                 // This XGBoost build cannot slice a booster, so the best one is kept as a UBJ copy, which holds categorical splits
                 bestModel = Some(model.toByteArray("ubj"))
               }
-              if ((it - lastBestIter) > esThreshold) {
-                logger.info(s"early stop: $esThreshold rounds passed, best=$lastBest last=$ndcgTest")
-                earlyStop = true
-              }
             case None => //
           }
+          // it is zero-based here, so it + 1 trees have been built
+          if (stopping.exists(_.shouldStop(it + 1, ndcgTest))) {
+            logger.info(stopping.get.describe(it + 1, ndcgTest))
+            earlyStop = true
+          }
         case None =>
-          logger.info(s"[$it] NDCG@train = $ndcgTrain")
+          logger.info(s"[${it + 1}] NDCG@train = $ndcgTrain")
       }
       it += 1
     }
