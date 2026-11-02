@@ -68,6 +68,7 @@ object LightGBMBooster extends BoosterFactory[LGBMDataset, LightGBMBooster, Ligh
     var earlyStop    = false
     var lastBest     = 0.0
     var lastBestIter = 0
+    val stopping     = options.earlyStopping.map(new Booster.EarlyStopping(_))
     while ((it < options.trees) && !earlyStop) {
       it += 1
       model.updateOneIter()
@@ -77,22 +78,30 @@ object LightGBMBooster extends BoosterFactory[LGBMDataset, LightGBMBooster, Ligh
           val ndcgTest = model.getEval(1)(0)
           logger.info(s"[$it] NDCG@train = $ndcgTrain NDCG@test = $ndcgTest")
           options.earlyStopping match {
-            case Some(esThreshold) =>
+            case Some(_) =>
               if (ndcgTest > lastBest) {
                 lastBest = ndcgTest
                 lastBestIter = it
               }
-              if ((it - lastBestIter) > esThreshold) {
-                logger.info(s"early stop: $esThreshold rounds passed, best=$lastBest last=$ndcgTest")
-                earlyStop = true
-              }
             case None => //
+          }
+          if (stopping.exists(_.shouldStop(it, ndcgTest))) {
+            logger.info(stopping.get.describe(it, ndcgTest))
+            earlyStop = true
           }
         case None =>
           logger.info(s"[$it] NDCG@train = $ndcgTrain")
       }
     }
-    LightGBMBooster(model)
+    if (lastBestIter > 0 && lastBestIter < it) {
+      // Saving only the first lastBestIter trees is the only way to truncate a LightGBM model
+      val truncated = model.saveModelToString(0, lastBestIter, FeatureImportanceType.SPLIT)
+      model.close()
+      logger.info(s"keeping the model as of iteration $lastBestIter of $it")
+      LightGBMBooster(LGBMBooster.loadModelFromString(truncated))
+    } else {
+      LightGBMBooster(model)
+    }
   }
 
 }

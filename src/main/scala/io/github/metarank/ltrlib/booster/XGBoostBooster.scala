@@ -122,6 +122,8 @@ object XGBoostBooster extends BoosterFactory[DMatrix, XGBoostBooster, XGBoostOpt
     var earlyStop    = false
     var lastBest     = 0.0
     var lastBestIter = 0
+    val stopping     = options.earlyStopping.map(new Booster.EarlyStopping(_))
+    var bestModel    = Option.empty[Array[Byte]]
     while ((it < options.trees) && !earlyStop) {
       model.update(dataset, it)
       val ndcgTrain = evalMetric(model, dataset, it)
@@ -129,27 +131,36 @@ object XGBoostBooster extends BoosterFactory[DMatrix, XGBoostBooster, XGBoostOpt
         case Some(value) =>
           val ndcgTest = evalMetric(model, value, it)
           logger.info(
-            s"[$it] NDCG@${options.ndcgCutoff}:train = $ndcgTrain NDCG@${options.ndcgCutoff}:test = $ndcgTest"
+            s"[${it + 1}] NDCG@${options.ndcgCutoff}:train = $ndcgTrain NDCG@${options.ndcgCutoff}:test = $ndcgTest"
           )
           options.earlyStopping match {
-            case Some(esThreshold) =>
+            case Some(_) =>
               if (ndcgTest > lastBest) {
                 lastBest = ndcgTest
                 lastBestIter = it
-              }
-              if ((it - lastBestIter) > esThreshold) {
-                logger.info(s"early stop: $esThreshold rounds passed, best=$lastBest last=$ndcgTest")
-                earlyStop = true
+                // This XGBoost build cannot slice a booster, so the best one is kept as a UBJ copy, which holds categorical splits
+                bestModel = Some(model.toByteArray("ubj"))
               }
             case None => //
           }
+          // it is zero-based here, so it + 1 trees have been built
+          if (stopping.exists(_.shouldStop(it + 1, ndcgTest))) {
+            logger.info(stopping.get.describe(it + 1, ndcgTest))
+            earlyStop = true
+          }
         case None =>
-          logger.info(s"[$it] NDCG@train = $ndcgTrain")
+          logger.info(s"[${it + 1}] NDCG@train = $ndcgTrain")
       }
       it += 1
     }
     val ftypes = (0 until dso.dims).map(x => if (dso.categoryFeatures.contains(x)) "c" else "q").toArray
-    XGBoostBooster(model, ftypes)
+    if (bestModel.isDefined && lastBestIter < it - 1) {
+      model.dispose()
+      logger.info(s"keeping the model as of iteration ${lastBestIter + 1} of $it")
+      XGBoostBooster(XGBoost.loadModel(new ByteArrayInputStream(bestModel.get)), ftypes)
+    } else {
+      XGBoostBooster(model, ftypes)
+    }
   }
 
   override def closeData(d: DMatrix): Unit = d.dispose()
